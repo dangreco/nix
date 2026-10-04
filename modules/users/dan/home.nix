@@ -12,18 +12,11 @@ in
     imports = [
       hm.base
       inputs.sops-nix.homeManagerModules.sops
+      hm.dan-git
     ];
 
     home.username = "dan";
     home.homeDirectory = "/home/dan";
-
-    programs.git = {
-      enable = true;
-      settings.user = {
-        name = "Dan Greco";
-        email = "git@dangre.co";
-      };
-    };
 
     sops = {
       age.keyFile = "/run/secrets/users/dan/age-key";

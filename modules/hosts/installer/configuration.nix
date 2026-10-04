@@ -17,7 +17,10 @@ in
       ...
     }:
     {
-      imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
+      imports = [
+        (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
+        nixos.dan-git
+      ];
 
       networking.hostName = "installer";
       nixpkgs.hostPlatform = "x86_64-linux";
@@ -47,9 +50,6 @@ in
       ];
 
       services.getty.helpLine = lib.mkForce "Run: sudo nix-install";
-
-      # Flake snapshot for an offline-capable mezcal install; rebuild the ISO after any repo change.
-      environment.etc."nix-config".source = self;
     };
 
   flake.nixosConfigurations.installer = inputs.nixpkgs.lib.nixosSystem {

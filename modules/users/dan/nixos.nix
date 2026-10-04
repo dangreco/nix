@@ -1,6 +1,7 @@
 { config, self, ... }:
 let
   master = config.keys.master;
+  nixos = config.flake.modules.nixos;
 in
 {
   keys.users.dan = "age1z623ah3syzzae9lauvukws96w3lsr99tq2a05cc8w7ktnv7mv3lq2sj50p";
@@ -8,6 +9,8 @@ in
   flake.modules.nixos.dan =
     { config, ... }:
     {
+      imports = [ nixos.dan-git ];
+
       my.users = [ "dan" ];
 
       sops.secrets."users/dan/password" = {
