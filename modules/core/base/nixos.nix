@@ -18,6 +18,15 @@ in
         description = "Normal users this flake manages on the host.";
       };
 
+      options.my.githubUsers = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = { };
+        example = {
+          dan = "dangreco";
+        };
+        description = "GitHub login of each managed user, keyed by local username.";
+      };
+
       config = {
         nix.settings = {
           experimental-features = [

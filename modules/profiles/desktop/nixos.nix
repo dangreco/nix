@@ -11,6 +11,7 @@ in
     nixos.sops
     nixos.network-connections
     nixos.gnome
+    nixos.github-avatar
     nixos.firefox
     nixos.firefox-gnome-theme
     nixos.onepassword

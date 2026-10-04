@@ -12,6 +12,7 @@ in
       imports = [ nixos.dan-git ];
 
       my.users = [ "dan" ];
+      my.githubUsers.dan = "dangreco";
 
       sops.secrets."users/dan/password" = {
         sopsFile = self + "/secrets/users/dan.yaml";

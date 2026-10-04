@@ -15,6 +15,8 @@ _: {
       environment.persistence."/persist" = {
         directories = [
           "/var/lib/bluetooth"
+          # User pictures (AccountsService); GDM shows them before any timer runs.
+          "/var/lib/AccountsService"
         ]
         # Enrolled fingerprints and Thunderbolt authorisations live here.
         ++ lib.optional config.services.fprintd.enable "/var/lib/fprint"
