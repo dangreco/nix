@@ -7,7 +7,10 @@ in
   flake.modules.nixos.base =
     { lib, pkgs, ... }:
     {
-      imports = [ nixos.shell ];
+      imports = [
+        nixos.shell
+        nixos.update
+      ];
 
       options.my.users = lib.mkOption {
         type = lib.types.listOf lib.types.str;
