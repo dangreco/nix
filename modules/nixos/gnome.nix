@@ -7,7 +7,12 @@ _: {
       services.gnome.gnome-initial-setup.enable = false;
 
       environment.persistence."/persist" = {
-        directories = [ "/var/lib/bluetooth" ];
+        directories = [
+          "/var/lib/bluetooth"
+        ]
+        # Enrolled fingerprints and Thunderbolt authorisations live here.
+        ++ lib.optional config.services.fprintd.enable "/var/lib/fprint"
+        ++ lib.optional config.services.hardware.bolt.enable "/var/lib/boltd";
         users = lib.genAttrs config.my.users (_: {
           directories = [
             ".config/dconf"
