@@ -9,6 +9,7 @@ in
     nixos.impermanence
     nixos.secure-boot
     nixos.sops
+    nixos.network-connections
     nixos.gnome
     nixos.onepassword
     nixos.flatpak
