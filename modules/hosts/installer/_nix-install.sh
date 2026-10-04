@@ -121,7 +121,8 @@ fi
 # ---------------------------------------------------------------- 2. workspace
 work=/tmp/nix-config
 rm -rf "$work"
-cp -rT --no-preserve=mode,ownership "$repo" "$work"
+# /etc/nix-config is a symlink into the store; cp -r would copy the link, not the tree.
+cp -rT --no-preserve=mode,ownership "$(readlink -f "$repo")" "$work"
 git -C "$work" init -q
 git -C "$work" add -A
 git -C "$work" -c user.name=nix-install -c user.email=nix-install@localhost commit -qm baseline
