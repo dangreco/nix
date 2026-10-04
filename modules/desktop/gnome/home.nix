@@ -18,6 +18,13 @@ _: {
       "org/gnome/desktop/interface" = {
         show-battery-percentage = true;
       };
+      "org/gnome/shell" = {
+        # Dock contents, in order. Desktop file IDs: Files, then Firefox.
+        favorite-apps = [
+          "org.gnome.Nautilus.desktop"
+          "firefox.desktop"
+        ];
+      };
     };
   };
 }
