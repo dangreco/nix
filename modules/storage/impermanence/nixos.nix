@@ -14,6 +14,8 @@
         after = [
           "dev-mapper-crypted.device"
           "systemd-cryptsetup@crypted.service"
+          # Never mutate the filesystem before a pending hibernation image is resumed.
+          "systemd-hibernate-resume.service"
         ];
         before = [ "sysroot.mount" ];
         unitConfig.DefaultDependencies = "no";

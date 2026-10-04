@@ -40,7 +40,7 @@ _: {
         "org/gnome/settings-daemon/plugins/power" = {
           idle-dim = true;
           power-saver-profile-on-low-battery = true;
-          # On battery: suspend after 15 minutes (seconds). On AC: never suspend.
+          # On battery: suspend after 15 minutes (seconds); hosts with nixos.hibernate turn this into suspend-then-hibernate. On AC: never suspend.
           sleep-inactive-battery-type = "suspend";
           sleep-inactive-battery-timeout = 900;
           sleep-inactive-ac-type = "nothing";

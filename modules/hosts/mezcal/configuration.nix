@@ -13,12 +13,14 @@ in
     imports = [
       nixos.desktop
       nixos.dan
+      nixos.hibernate
       inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
     ];
 
     networking.hostName = "mezcal";
     nixpkgs.hostPlatform = "x86_64-linux";
     my.disk.device = "/dev/disk/by-id/nvme-KINGSTON_SNV3S1000G_50026B76878C3509";
+    my.disk.swapSize = "32G";
     hardware.facter.reportPath = ./facter.json;
 
     # Framework: keep vendor-signed firmware updates working.

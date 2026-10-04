@@ -16,6 +16,13 @@
         description = "Block device the disko layout is installed on.";
       };
 
+      options.my.disk.swapSize = lib.mkOption {
+        type = lib.types.nullOr (lib.types.strMatching "^[0-9]+[KMGTP]$");
+        default = null;
+        example = "32G";
+        description = "Size of the btrfs swapfile /swap/swapfile inside LUKS (hibernation target); null = no disk swap.";
+      };
+
       config.disko.devices.disk.main = {
         type = "disk";
         device = config.my.disk.device;
@@ -54,6 +61,14 @@
                     "/persist" = {
                       mountpoint = "/persist";
                       inherit mountOptions;
+                    };
+                  }
+                  // lib.optionalAttrs (config.my.disk.swapSize != null) {
+                    # No compress= here: swapfiles must not be compressed.
+                    "/swap" = {
+                      mountpoint = "/swap";
+                      mountOptions = [ "noatime" ];
+                      swap.swapfile.size = config.my.disk.swapSize;
                     };
                   };
                 };

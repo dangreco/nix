@@ -19,11 +19,13 @@ in
     imports = [
       nixos.desktop
       nixos.dan
+      nixos.hibernate
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x1-10th-gen
     ];
     networking.hostName = "sake";
     nixpkgs.hostPlatform = "x86_64-linux";
     my.disk.device = "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S64ANJ0R924661P";
+    my.disk.swapSize = "32G";
     hardware.facter.reportPath = ./facter.json;
 
     # This firmware has no dbDefault EFI variable, so `sbctl enroll-keys
