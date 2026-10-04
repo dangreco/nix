@@ -92,10 +92,14 @@ _: {
           "/var/lib/AccountsService"
           # GDM 49 keeps the greeter's config (incl. monitors.xml) in seat0/config and wipes it on any boot where its .migrated-dyn-users stamp is missing.
           "/var/lib/gdm"
+          # The power profile picked from GNOME's battery menu.
+          "/var/lib/power-profiles-daemon"
         ]
         # Enrolled fingerprints and Thunderbolt authorisations live here.
         ++ lib.optional config.services.fprintd.enable "/var/lib/fprint"
-        ++ lib.optional config.services.hardware.bolt.enable "/var/lib/boltd";
+        ++ lib.optional config.services.hardware.bolt.enable "/var/lib/boltd"
+        # fwupd's update history and cached LVFS metadata.
+        ++ lib.optional config.services.fwupd.enable "/var/lib/fwupd";
         users = lib.genAttrs config.my.users (_: {
           directories = [
             ".config/dconf"
@@ -103,6 +107,10 @@ _: {
               directory = ".local/share/keyrings";
               mode = "0700";
             }
+            # WirePlumber's saved state: default audio device, volumes, mutes.
+            ".local/state/wireplumber"
+            # Localsearch's index; without it every boot re-crawls the home directories.
+            ".cache/tracker3"
           ];
         });
       };
