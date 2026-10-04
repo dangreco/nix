@@ -94,6 +94,10 @@ _: {
           "/var/lib/gdm"
           # The power profile picked from GNOME's battery menu.
           "/var/lib/power-profiles-daemon"
+          # Charge history; upower's time-remaining estimates are coarse without it.
+          "/var/lib/upower"
+          # ICC profiles installed through Settings → Color.
+          "/var/lib/colord"
         ]
         # Enrolled fingerprints and Thunderbolt authorisations live here.
         ++ lib.optional config.services.fprintd.enable "/var/lib/fprint"
@@ -107,6 +111,13 @@ _: {
               directory = ".local/share/keyrings";
               mode = "0700";
             }
+            # GNOME Online Accounts credentials (accounts.conf).
+            {
+              directory = ".config/goa-1.0";
+              mode = "0700";
+            }
+            # Files sidebar bookmarks.
+            ".config/gtk-3.0"
             # WirePlumber's saved state: default audio device, volumes, mutes.
             ".local/state/wireplumber"
             # Localsearch's index; without it every boot re-crawls the home directories.
