@@ -41,7 +41,7 @@ in
   flake.nixosConfigurations.sake = inputs.nixpkgs.lib.nixosSystem { modules = [ nixos.sake ]; };
   flake.homeConfigurations."dan@sake" = mkHome [
     hm.dan
-    hm.onepassword
+    hm.desktop
     { my.onepassword.sshAgentItems = [ config.keys.hosts.sake.opItem ]; }
   ];
 }

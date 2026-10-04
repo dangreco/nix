@@ -33,7 +33,7 @@ in
     pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
     modules = [
       hm.dan
-      hm.onepassword
+      hm.desktop
     ];
   };
 }
