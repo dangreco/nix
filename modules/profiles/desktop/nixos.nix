@@ -8,6 +8,7 @@ in
     nixos.disk
     nixos.impermanence
     nixos.secure-boot
+    nixos.boot-splash
     nixos.sops
     nixos.network-connections
     nixos.gnome
