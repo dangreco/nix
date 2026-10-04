@@ -11,6 +11,7 @@ in
     nixos.sops
     nixos.network-connections
     nixos.gnome
+    nixos.firefox
     nixos.onepassword
     nixos.flatpak
     nixos.podman
