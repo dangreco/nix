@@ -12,7 +12,7 @@ _: {
       };
       "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal" = {
         binding = "<Super>Return";
-        command = "ptyxis";
+        command = "ptyxis --new-window";
         name = "Terminal";
       };
       "org/gnome/desktop/interface" = {
