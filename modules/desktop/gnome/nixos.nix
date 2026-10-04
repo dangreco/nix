@@ -1,11 +1,17 @@
 _: {
   flake.modules.nixos.gnome =
-    { config, lib, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       services.displayManager.gdm.enable = true;
       services.desktopManager.gnome.enable = true;
       services.gnome.gnome-initial-setup.enable = false;
 
+      environment.systemPackages = [ pkgs.ptyxis ];
       environment.persistence."/persist" = {
         directories = [
           "/var/lib/bluetooth"

@@ -4,6 +4,17 @@ _: {
   # self-explanatory. `gsettings list-recursively` or dconf-editor shows the current values.
   flake.modules.homeManager.gnome = {
     dconf.settings = {
+      "org/gnome/settings-daemon/plugins/media-keys" = {
+        # The paths of this user's custom keybindings.
+        custom-keybindings = [
+          "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal/"
+        ];
+      };
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/terminal" = {
+        binding = "<Super>Return";
+        command = "ptyxis";
+        name = "Terminal";
+      };
       "org/gnome/desktop/interface" = {
         show-battery-percentage = true;
       };
