@@ -1,7 +1,14 @@
-_: {
+{ config, ... }:
+let
+  nixos = config.flake.modules.nixos;
+in
+{
+  # Every host imports base, so everything imported here is on every host.
   flake.modules.nixos.base =
     { lib, pkgs, ... }:
     {
+      imports = [ nixos.shell ];
+
       options.my.users = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
