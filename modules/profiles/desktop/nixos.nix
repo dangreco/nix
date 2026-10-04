@@ -12,6 +12,7 @@ in
     nixos.network-connections
     nixos.gnome
     nixos.firefox
+    nixos.firefox-gnome-theme
     nixos.onepassword
     nixos.flatpak
     nixos.podman

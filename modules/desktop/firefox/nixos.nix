@@ -31,9 +31,14 @@ _: {
       # vainfo, to check which codecs the GPU exposes.
       environment.systemPackages = [ pkgs.libva-utils ];
 
-      # The profile is under ~/.mozilla; the rest of /home is wiped at boot.
+      # Fresh installs of Firefox 147+ keep the profile in ~/.config/mozilla, existing ones in
+      # ~/.mozilla. Which one wins can depend on whether ~/.mozilla exists, and the bind
+      # mount below creates it, so persist both. The rest of /home is wiped at boot.
       environment.persistence."/persist".users = lib.genAttrs config.my.users (_: {
-        directories = [ ".mozilla" ];
+        directories = [
+          ".mozilla"
+          ".config/mozilla"
+        ];
       });
     };
 }
