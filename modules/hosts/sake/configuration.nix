@@ -26,8 +26,9 @@ in
     my.disk.device = "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S64ANJ0R924661P";
     hardware.facter.reportPath = ./facter.json;
 
-    # ThinkPad: keep vendor-signed firmware updates working.
-    boot.lanzaboote.autoEnrollKeys.includeFirmwareBuiltinKeys = true;
+    # This firmware has no dbDefault EFI variable, so `sbctl enroll-keys
+    # --firmware-builtin` always fails here (includeFirmwareBuiltinKeys stays off).
+    # Microsoft keys are still enrolled (the lanzaboote default), which covers option ROMs.
 
     # Alder Lake only needs the iHD driver; the nixos-hardware profile pulls in both.
     hardware.intelgpu.vaapiDriver = "intel-media-driver";
