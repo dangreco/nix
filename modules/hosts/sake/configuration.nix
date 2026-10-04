@@ -41,5 +41,6 @@ in
   flake.homeConfigurations."dan@sake" = mkHome [
     hm.dan
     hm.onepassword
+    { my.onepassword.sshAgentItems = [ config.keys.hosts.sake.opItem ]; }
   ];
 }

@@ -198,7 +198,7 @@ if [ "$choice" = "+ New host" ]; then
   while read -r u; do
     [ -n "$u" ] || continue
     users_nixos+="${users_nixos:+ }nixos.$u"
-    home_configs+="  flake.homeConfigurations.\"$u@@HOST@\" = mkHome [ hm.$u hm.onepassword ];"$'\n'
+    home_configs+="  flake.homeConfigurations.\"$u@@HOST@\" = mkHome [ hm.$u hm.onepassword { my.onepassword.sshAgentItems = [ config.keys.hosts.@HOST@.opItem ]; } ];"$'\n'
   done <<<"$users_list"
   home_configs=${home_configs%$'\n'}
 
