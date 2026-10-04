@@ -16,5 +16,6 @@ in
     nixos.onepassword
     nixos.flatpak
     nixos.podman
+    nixos.dev-tools
   ];
 }

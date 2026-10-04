@@ -7,5 +7,6 @@ in
   flake.modules.homeManager.desktop.imports = [
     hm.gnome
     hm.onepassword
+    hm.dev-tools
   ];
 }
