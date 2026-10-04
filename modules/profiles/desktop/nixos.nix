@@ -16,6 +16,7 @@ in
     nixos.firefox-gnome-theme
     nixos.onepassword
     nixos.flatpak
+    nixos.flatpak-apps
     nixos.podman
     nixos.dev-tools
   ];

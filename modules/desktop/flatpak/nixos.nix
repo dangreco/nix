@@ -18,9 +18,8 @@
             location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
           }
         ];
-        # Declarative app list, intentionally empty: apps installed through
+        # Desktop apps are declared in nixos.flatpak-apps; apps installed through
         # GNOME Software or the flatpak CLI are kept.
-        packages = [ ];
         uninstallUnmanaged = false;
         update.auto = {
           enable = true;
