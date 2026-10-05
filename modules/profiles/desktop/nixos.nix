@@ -20,5 +20,7 @@ in
     nixos.flatpak-apps
     nixos.podman
     nixos.dev-tools
+    nixos.zed
+    nixos.microcontrollers
   ];
 }

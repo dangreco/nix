@@ -8,5 +8,6 @@ in
     hm.gnome
     hm.onepassword
     hm.dev-tools
+    hm.zed
   ];
 }
