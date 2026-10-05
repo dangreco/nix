@@ -10,8 +10,11 @@ _: {
       install = pkgs.writeShellApplication {
         name = "omp-install";
         runtimeInputs = with pkgs; [
-          curl
+          bash
           coreutils
+          curl
+          gnugrep
+          gnused
         ];
         text = builtins.readFile ./_install.sh;
       };
