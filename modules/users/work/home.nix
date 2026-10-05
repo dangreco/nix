@@ -22,7 +22,6 @@ in
     sops = {
       age.keyFile = "/run/secrets/users/work/age-key";
       defaultSopsFile = self + "/secrets/users/work.yaml";
-      secrets."users/work/home/smoke" = { };
     };
   };
 }
