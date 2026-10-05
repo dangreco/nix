@@ -22,12 +22,22 @@ _: {
     in
     {
       # Zed's upstream build expects a "traditional" Linux; zed.dev/docs/linux
-      # names nix-ld as the NixOS compatibility layer. vulkan-loader joins the
-      # module's default library set (lists merge): the nixpkgs-patched loader
-      # discovers GPU drivers under /run/opengl-driver.
+      # names nix-ld as the NixOS compatibility layer. These join the module's
+      # default set (lists merge). Sources: zed-editor's DT_NEEDED minus what
+      # zed.app/lib already bundles (glib, alsa-lib + their deps), and Zed's
+      # own nix/build.nix, which dlopens vulkan/wayland/libva at render time.
       programs.nix-ld = {
         enable = true;
-        libraries = [ pkgs.vulkan-loader ];
+        libraries = [
+          pkgs.glib
+          pkgs.pcre2 # glib
+          pkgs.libffi # glib
+          pkgs.alsa-lib
+          pkgs.vulkan-loader # blade GPU renderer (dlopen)
+          pkgs.wayland # winit Wayland backend (dlopen)
+          pkgs.libva # video decode (dlopen)
+          pkgs.libdrm # libva
+        ];
       };
 
       # The default settings (dan-zed HM module) use Inter for the UI and
