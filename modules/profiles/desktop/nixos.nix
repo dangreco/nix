@@ -21,6 +21,7 @@ in
     nixos.podman
     nixos.dev-tools
     nixos.zed
+    nixos.omp
     nixos.microcontrollers
   ];
 }

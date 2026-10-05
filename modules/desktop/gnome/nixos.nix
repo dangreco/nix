@@ -83,8 +83,10 @@ _: {
       services.displayManager.gdm.enable = true;
       services.desktopManager.gnome.enable = true;
       services.gnome.gnome-initial-setup.enable = false;
-
-      environment.systemPackages = [ pkgs.ptyxis ];
+      environment.systemPackages = [
+        pkgs.ptyxis
+        pkgs.lm_sensors
+      ];
       environment.persistence."/persist" = {
         directories = [
           "/var/lib/bluetooth"
@@ -123,6 +125,7 @@ _: {
             # Localsearch's index; without it every boot re-crawls the home directories.
             ".cache/tracker3"
           ];
+          files = [ ".config/mimeapps.list" ];
         });
       };
 

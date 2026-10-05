@@ -29,6 +29,11 @@ in
     my.disk.device = "/dev/disk/by-id/nvme-KINGSTON_SNV3S1000G_50026B76878C3509";
     my.disk.swapSize = "32G";
     hardware.facter.reportPath = ./facter.json;
+    hardware.framework.enableKmod = true;
+    boot.kernelModules = [
+      "cros_ec_lpcs"
+      "cros_ec_hwmon"
+    ];
 
     # Framework: keep vendor-signed firmware updates working.
     boot.lanzaboote.autoEnrollKeys.includeFirmwareBuiltinKeys = true;

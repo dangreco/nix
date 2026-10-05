@@ -14,6 +14,8 @@ in
       inputs.sops-nix.homeManagerModules.sops
       hm.work-git
       hm.work-zed
+      hm.omp
+      hm.work-omp
     ];
 
     home.username = "work";

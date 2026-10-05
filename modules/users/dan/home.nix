@@ -14,6 +14,8 @@ in
       inputs.sops-nix.homeManagerModules.sops
       hm.dan-git
       hm.dan-zed
+      hm.omp
+      hm.dan-omp
     ];
 
     home.username = "dan";
