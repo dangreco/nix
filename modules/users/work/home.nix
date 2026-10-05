@@ -2,6 +2,7 @@
   config,
   inputs,
   self,
+  lib,
   ...
 }:
 let
@@ -24,6 +25,9 @@ in
     sops = {
       age.keyFile = "/run/secrets/users/work/age-key";
       defaultSopsFile = self + "/secrets/users/work.yaml";
+    };
+    dconf.settings."org/gnome/shell" = {
+      favorite-apps = lib.mkAfter [ "com.slack.Slack.desktop" ];
     };
   };
 }
