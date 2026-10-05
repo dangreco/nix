@@ -31,7 +31,10 @@
           "nixd"
           "!nil"
         ];
-        formatter = "language server";
+        # snake_case per Zed's Formatter enum
+        # (crates/settings_content/src/language.rs); "language server"
+        # with a space matches no variant and breaks settings parsing.
+        formatter = "language_server";
       };
 
       title_bar = {
