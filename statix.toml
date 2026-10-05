@@ -1,3 +1,4 @@
 # repeated_keys fights the dendritic layout: each module sets flake.modules.*,
 # flake.nixosConfigurations.* etc. as separate top-level attributes on purpose.
+ignore = [".direnv"]
 disabled = ["repeated_keys"]

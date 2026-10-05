@@ -19,6 +19,7 @@ in
     imports = [
       nixos.desktop
       nixos.dan
+      nixos.work
       nixos.hibernate
       inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
     ];
@@ -41,5 +42,11 @@ in
     hm.dan
     hm.desktop
     { my.onepassword.sshAgentItems = [ config.keys.hosts.mezcal.opItem ]; }
+  ];
+
+  flake.homeConfigurations."work@mezcal" = mkHome [
+    hm.work
+    hm.desktop
+    { my.onepassword.sshAgentItems = [ ]; }
   ];
 }

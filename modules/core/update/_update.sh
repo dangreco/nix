@@ -31,6 +31,13 @@ step() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 die() { echo "update: $*" >&2; exit 1; }
 
 [ "$EUID" -ne 0 ] || die "run this as your own user, not root; sudo is used for the NixOS step"
+if [ "$pull" = 1 ] && [ ! -d "$repo/.git" ]; then
+  step "Cloning $branch into $repo"
+  mkdir -p "$(dirname "$repo")"
+  git clone -b "$branch" --quiet https://github.com/dangreco/nix.git "$repo" \
+    || die "could not clone https://github.com/dangreco/nix.git"
+fi
+
 [ -f "$repo/flake.nix" ] || die "no flake at $repo"
 git -C "$repo" rev-parse --git-dir >/dev/null 2>&1 || die "$repo is not a git checkout"
 
@@ -102,13 +109,13 @@ if [ "$pull" = 1 ]; then
   [ "$current" = "$branch" ] \
     || die "$repo is on '${current:-a detached HEAD}', not $branch; run: git -C $repo switch $branch"
 
-  git -C "$repo" fetch --quiet origin "$branch" \
-    || die "could not fetch origin/$branch (network down, or the SSH agent is not running?)"
+  git -C "$repo" fetch --quiet https://github.com/dangreco/nix.git "$branch" \
+    || die "could not fetch https://github.com/dangreco/nix.git (network down?)"
 
   before=$(git -C "$repo" rev-parse --short HEAD)
   # Fast-forward only: never create a merge commit or touch local commits.
-  git -C "$repo" merge --ff-only --quiet "origin/$branch" \
-    || die "cannot fast-forward $branch to origin/$branch; resolve it in $repo"
+  git -C "$repo" merge --ff-only --quiet FETCH_HEAD \
+    || die "cannot fast-forward $branch to remote; resolve it in $repo"
   after=$(git -C "$repo" rev-parse --short HEAD)
 
   if [ "$before" = "$after" ]; then
@@ -118,18 +125,20 @@ if [ "$pull" = 1 ]; then
     git -C "$repo" log --oneline --no-decorate "$before..$after"
   fi
 fi
+if [ "$user" = "dan" ]; then
+  # ---------------------------------------------------------------- sudo
+  # The boxed steps run in the background with no terminal input, so a password prompt
+  # would hang. Ask once here; the cached credential covers the NixOS step.
+  if [ "$verbose" = 0 ] && [ -t 1 ]; then
+    sudo -v || die "sudo authentication failed"
+  fi
 
-# ---------------------------------------------------------------- sudo
-# The boxed steps run in the background with no terminal input, so a password prompt
-# would hang. Ask once here; the cached credential covers the NixOS step.
-if [ "$verbose" = 0 ] && [ -t 1 ]; then
-  sudo -v || die "sudo authentication failed"
+  # ---------------------------------------------------------------- NixOS
+  # Not allowed to rewrite flake.lock: running as root, it would leave a root-owned file in the checkout.
+  run_boxed "NixOS ($host)" sudo nixos-rebuild switch --flake "$repo#$host" --no-write-lock-file
+else
+  echo "update: user '$user' is not a main user; skipping NixOS system update" >&2
 fi
-
-# ---------------------------------------------------------------- NixOS
-# Not allowed to rewrite flake.lock: running as root, it would leave a root-owned file in the checkout.
-run_boxed "NixOS ($host)" sudo nixos-rebuild switch --flake "$repo#$host" --no-write-lock-file
-
 # ---------------------------------------------------------------- Home Manager
 configs=$(nix eval --json "$repo#homeConfigurations" --apply builtins.attrNames)
 if jq -e --arg c "$user@$host" 'index($c) != null' <<<"$configs" >/dev/null; then

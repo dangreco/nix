@@ -5,6 +5,10 @@ _: {
       items = config.my.onepassword.sshAgentItems;
     in
     {
+      options.my.onepassword.enable = lib.mkEnableOption "1password integration" // {
+        default = true;
+      };
+
       options.my.onepassword.sshAgentItems = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
@@ -15,7 +19,7 @@ _: {
         '';
       };
 
-      config = {
+      config = lib.mkIf config.my.onepassword.enable {
         programs.ssh = {
           enable = true;
           enableDefaultConfig = false;
