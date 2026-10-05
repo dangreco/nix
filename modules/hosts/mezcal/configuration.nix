@@ -2,6 +2,12 @@
 let
   nixos = config.flake.modules.nixos;
   hm = config.flake.modules.homeManager;
+  mkHome =
+    modules:
+    inputs.home-manager.lib.homeManagerConfiguration {
+      pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
+      inherit modules;
+    };
 in
 {
   keys.hosts.mezcal = {
@@ -31,11 +37,9 @@ in
     modules = [ nixos.mezcal ];
   };
 
-  flake.homeConfigurations."dan@mezcal" = inputs.home-manager.lib.homeManagerConfiguration {
-    pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-    modules = [
-      hm.dan
-      hm.desktop
-    ];
-  };
+  flake.homeConfigurations."dan@mezcal" = mkHome [
+    hm.dan
+    hm.desktop
+    { my.onepassword.sshAgentItems = [ config.keys.hosts.mezcal.opItem ]; }
+  ];
 }
