@@ -24,6 +24,16 @@
       load_direnv = "direct";
       format_on_save = "on";
 
+      # nixd over nil: real flake evaluation (see nixos.nix). "!nil" removes
+      # the Nix extension's default server so they cannot both attach.
+      languages.Nix = {
+        language_servers = [
+          "nixd"
+          "!nil"
+        ];
+        formatter = "language server";
+      };
+
       title_bar = {
         show_onboarding_banner = false;
         show_user_picture = false;

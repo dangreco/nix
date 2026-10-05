@@ -48,6 +48,17 @@ _: {
         pkgs.jetbrains-mono
       ];
 
+      # Nix tooling for the editor (and shells, which share this PATH):
+      # nixd because it evaluates real flake code (this repo's flake-parts +
+      # import-tree idioms) rather than approximating it, and it embeds
+      # nixfmt-based formatting. nixfmt matches the version the repo's
+      # pre-commit hooks pin, so editor format-on-save agrees with CI-side
+      # formatting. nil is deliberately absent: one server per language.
+      environment.systemPackages = [
+        pkgs.nixd
+        pkgs.nixfmt
+      ];
+
       # One service per managed user (pattern: home-manager-restore-<user> in
       # modules/storage/impermanence/nixos.nix). Installs only when missing;
       # afterwards Zed updates itself (auto_update).
