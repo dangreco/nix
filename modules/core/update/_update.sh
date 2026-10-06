@@ -3,7 +3,7 @@ usage() {
   cat <<'EOF'
 usage: update [--pull] [--verbose]
 
-Apply the flake in ~/projects/nix to this machine: NixOS first, then Home Manager.
+Apply the flake in ~/projects/nix to this machine (NixOS, including every user's Home Manager config).
 Each step shows only the last three lines of its output; a failed step prints more.
 
   --pull       fast-forward the checkout to the latest origin/dev first
@@ -125,24 +125,17 @@ if [ "$pull" = 1 ]; then
     git -C "$repo" log --oneline --no-decorate "$before..$after"
   fi
 fi
-if [ "$user" = "dan" ]; then
-  # ---------------------------------------------------------------- sudo
-  # The boxed steps run in the background with no terminal input, so a password prompt
-  # would hang. Ask once here; the cached credential covers the NixOS step.
-  if [ "$verbose" = 0 ] && [ -t 1 ]; then
-    sudo -v || die "sudo authentication failed"
-  fi
+# Home Manager is part of the NixOS configuration, so this one step updates every
+# user's home too.
+[ "$user" = "dan" ] || die "user '$user' is not a main user; ask dan to run update (it covers every user's Home Manager config)"
 
-  # ---------------------------------------------------------------- NixOS
-  # Not allowed to rewrite flake.lock: running as root, it would leave a root-owned file in the checkout.
-  run_boxed "NixOS ($host)" sudo nixos-rebuild switch --flake "$repo#$host" --no-write-lock-file
-else
-  echo "update: user '$user' is not a main user; skipping NixOS system update" >&2
+# ---------------------------------------------------------------- sudo
+# The boxed steps run in the background with no terminal input, so a password prompt
+# would hang. Ask once here; the cached credential covers the NixOS step.
+if [ "$verbose" = 0 ] && [ -t 1 ]; then
+  sudo -v || die "sudo authentication failed"
 fi
-# ---------------------------------------------------------------- Home Manager
-configs=$(nix eval --json "$repo#homeConfigurations" --apply builtins.attrNames)
-if jq -e --arg c "$user@$host" 'index($c) != null' <<<"$configs" >/dev/null; then
-  run_boxed "Home Manager ($user@$host)" home-manager switch --flake "$repo#$user@$host"
-else
-  echo "update: the flake has no Home Manager configuration '$user@$host'; skipping" >&2
-fi
+
+# ---------------------------------------------------------------- NixOS
+# Not allowed to rewrite flake.lock: running as root, it would leave a root-owned file in the checkout.
+run_boxed "NixOS ($host)" sudo nixos-rebuild switch --flake "$repo#$host" --no-write-lock-file

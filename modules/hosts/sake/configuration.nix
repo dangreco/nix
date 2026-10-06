@@ -1,13 +1,7 @@
 { config, inputs, ... }:
 let
   nixos = config.flake.modules.nixos;
-  hm = config.flake.modules.homeManager;
-  mkHome =
-    modules:
-    inputs.home-manager.lib.homeManagerConfiguration {
-      pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-      inherit modules;
-    };
+  opItem = config.keys.hosts.sake.opItem;
 in
 {
   keys.hosts.sake = {
@@ -17,11 +11,14 @@ in
 
   flake.modules.nixos.sake = {
     imports = [
-      nixos.desktop
+      nixos.base
       nixos.dan
-      nixos.hibernate
       inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x1-10th-gen
     ];
+
+    my.profiles.desktop.enable = true;
+    my.hibernate.enable = true;
+
     networking.hostName = "sake";
     nixpkgs.hostPlatform = "x86_64-linux";
     my.disk.device = "/dev/disk/by-id/nvme-Samsung_SSD_980_1TB_S64ANJ0R924661P";
@@ -38,12 +35,9 @@ in
     # UEFI and Thunderbolt firmware from LVFS.
     services.fwupd.enable = true;
     services.thermald.enable = true;
+
+    home-manager.users.dan.my.onepassword.sshAgentItems = [ opItem ];
   };
 
   flake.nixosConfigurations.sake = inputs.nixpkgs.lib.nixosSystem { modules = [ nixos.sake ]; };
-  flake.homeConfigurations."dan@sake" = mkHome [
-    hm.dan
-    hm.desktop
-    { my.onepassword.sshAgentItems = [ config.keys.hosts.sake.opItem ]; }
-  ];
 }

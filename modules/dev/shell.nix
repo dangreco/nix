@@ -7,7 +7,6 @@ in
     {
       config,
       pkgs,
-      inputs',
       ...
     }:
     {
@@ -21,7 +20,6 @@ in
           pkgs.jq
           pkgs.yq-go
           pkgs.git
-          inputs'.home-manager.packages.default
         ];
         SOPS_AGE_SSH_PRIVATE_KEY_CMD = "op read \"${keys.masterOpRef}\"";
       };

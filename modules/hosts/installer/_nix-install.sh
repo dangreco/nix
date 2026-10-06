@@ -194,43 +194,39 @@ if [ "$choice" = "+ New host" ]; then
   age=$(ssh-keygen -y -f "$tmpkey" | ssh-to-age)
 
   users_nixos=""
-  home_configs=""
+  agent_items=""
   while read -r u; do
     [ -n "$u" ] || continue
     users_nixos+="${users_nixos:+ }nixos.$u"
-    home_configs+="  flake.homeConfigurations.\"$u@@HOST@\" = mkHome [ hm.$u hm.desktop { my.onepassword.sshAgentItems = [ config.keys.hosts.@HOST@.opItem ]; } ];"$'\n'
+    agent_items+="    home-manager.users.$u.my.onepassword.sshAgentItems = [ config.keys.hosts.@HOST@.opItem ];"$'\n'
   done <<<"$users_list"
-  home_configs=${home_configs%$'\n'}
+  agent_items=${agent_items%$'\n'}
 
   tpl=$(cat <<'EOF'
 { config, inputs, ... }:
 let
   nixos = config.flake.modules.nixos;
-  hm = config.flake.modules.homeManager;
-  mkHome = modules: inputs.home-manager.lib.homeManagerConfiguration {
-    pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-    inherit modules;
-  };
 in
 {
   keys.hosts.@HOST@ = { age = "@AGE@"; opItem = "@ITEM@"; };
 
   flake.modules.nixos.@HOST@ = {
-    imports = [ nixos.desktop @USERS_NIXOS@ ];
+    imports = [ nixos.base @USERS_NIXOS@ ];
+    my.profiles.desktop.enable = true;
     networking.hostName = "@HOST@";
     nixpkgs.hostPlatform = "x86_64-linux";
     my.disk.device = "@DISK@";
     hardware.facter.reportPath = ./facter.json;
     boot.lanzaboote.autoEnrollKeys.includeFirmwareBuiltinKeys = true;
+@AGENT_ITEMS@
   };
 
   flake.nixosConfigurations.@HOST@ = inputs.nixpkgs.lib.nixosSystem { modules = [ nixos.@HOST@ ]; };
-@HOME_CONFIGS@
 }
 EOF
 )
   tpl=${tpl//@USERS_NIXOS@/$users_nixos}
-  tpl=${tpl//@HOME_CONFIGS@/$home_configs}
+  tpl=${tpl//@AGENT_ITEMS@/$agent_items}
   tpl=${tpl//@DISK@/$disk}
   tpl=${tpl//@AGE@/$age}
   tpl=${tpl//@ITEM@/$item}

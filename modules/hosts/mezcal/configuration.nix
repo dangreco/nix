@@ -1,13 +1,7 @@
 { config, inputs, ... }:
 let
   nixos = config.flake.modules.nixos;
-  hm = config.flake.modules.homeManager;
-  mkHome =
-    modules:
-    inputs.home-manager.lib.homeManagerConfiguration {
-      pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-      inherit modules;
-    };
+  opItem = config.keys.hosts.mezcal.opItem;
 in
 {
   keys.hosts.mezcal = {
@@ -17,11 +11,13 @@ in
 
   flake.modules.nixos.mezcal = {
     imports = [
-      nixos.desktop
+      nixos.base
       nixos.dan
       nixos.work
       inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
     ];
+
+    my.profiles.desktop.enable = true;
 
     networking.hostName = "mezcal";
     nixpkgs.hostPlatform = "x86_64-linux";
@@ -36,21 +32,11 @@ in
 
     # Framework: keep vendor-signed firmware updates working.
     boot.lanzaboote.autoEnrollKeys.includeFirmwareBuiltinKeys = true;
+
+    home-manager.users.dan.my.onepassword.sshAgentItems = [ opItem ];
   };
 
   flake.nixosConfigurations.mezcal = inputs.nixpkgs.lib.nixosSystem {
     modules = [ nixos.mezcal ];
   };
-
-  flake.homeConfigurations."dan@mezcal" = mkHome [
-    hm.dan
-    hm.desktop
-    { my.onepassword.sshAgentItems = [ config.keys.hosts.mezcal.opItem ]; }
-  ];
-
-  flake.homeConfigurations."work@mezcal" = mkHome [
-    hm.work
-    hm.desktop
-    { my.onepassword.sshAgentItems = [ ]; }
-  ];
 }
