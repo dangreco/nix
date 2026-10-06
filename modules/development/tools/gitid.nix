@@ -12,7 +12,13 @@ _: {
           hash = "sha256-ITLEG1G4wWWiFwy239CuVivhTEr1w676YkltC4BtbUw=";
         };
         cargoHash = "sha256-QJwX2xegcQNzTulPAkcp2jHmdw2xZJqFNS3EycWbtAo=";
-        nativeBuildInputs = [ pkgs.openssh pkgs.git ];
+        nativeBuildInputs = [ pkgs.openssh pkgs.git pkgs.installShellFiles ];
+        postInstall = ''
+          installShellCompletion --cmd gitid \
+            --bash <($out/bin/gitid completions bash) \
+            --fish <($out/bin/gitid completions fish) \
+            --zsh <($out/bin/gitid completions zsh)
+        '';
         meta = with pkgs.lib; {
           description = "Switch between git identities per directory";
           homepage = "https://github.com/dgreco-at-speer/gitid";
