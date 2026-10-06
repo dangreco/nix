@@ -86,6 +86,27 @@ in
             ];
           };
 
+          # Bundled z.ai catalog; only the key is overridden, from sops.
+          my.omp.models.providers.zai.apiKey = config.sops.placeholder."users/dan/home/omp/zai-api-key";
+
+          # Claude (via proxy) -> GLM. A model-keyed chain applies in every role.
+          # Context sizes are matched: 1M models fall back to 1M GLMs, haiku to 200K.
+          # glm-5.2/5.3 only take high/max thinking, so the suffix is explicit.
+          my.omp.settings.retry.fallbackChains = {
+            "proxy/opus" = [
+              "zai/glm-5.3:high"
+              "zai/glm-5.2:high"
+            ];
+            "proxy/sonnet" = [
+              "zai/glm-5.2:high"
+              "zai/glm-5.1"
+            ];
+            "proxy/haiku" = [
+              "zai/glm-5-turbo"
+              "zai/glm-4.7-flashx"
+            ];
+          };
+
           programs.git = {
             enable = true;
             settings.user = git;
@@ -98,6 +119,7 @@ in
               "users/dan/home/smoke" = { };
               "users/dan/home/omp/base-url" = { };
               "users/dan/home/omp/api-key" = { };
+              "users/dan/home/omp/zai-api-key" = { };
             };
           };
 
