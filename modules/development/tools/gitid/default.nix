@@ -21,6 +21,7 @@
         programs.fish.interactiveShellInit = ''
           ${lib.getExe gitid} hook fish | source
           ${lib.getExe gitid} completions fish | source
+          ${lib.getExe gitid} sync
         '';
 
         # The identities and directory mappings.
