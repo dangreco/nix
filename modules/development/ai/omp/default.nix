@@ -68,10 +68,45 @@ _: {
       config,
       lib,
       osConfig,
+      pkgs,
       ...
     }:
     let
       cfg = config.my.omp;
+      target = "${config.home.homeDirectory}/.omp/agent/config.yml";
+
+      managed = (pkgs.formats.yaml { }).generate "omp-managed.yml" cfg.settings;
+
+      # Deep-merges the declared settings over the live config.yml. omp keeps
+      # write access to the file and to every key not declared here; declared
+      # keys are reasserted on each activation. Objects merge, arrays and
+      # scalars are replaced (same rules as omp's own layer merge).
+      sync = pkgs.writeShellApplication {
+        name = "omp-sync-config";
+        runtimeInputs = with pkgs; [
+          coreutils
+          jq
+          yq-go
+        ];
+        text = ''
+          target=${lib.escapeShellArg target}
+          mkdir -p "$(dirname "$target")"
+
+          live='{}'
+          if [ -s "$target" ]; then
+            live=$(yq -o=json '.' "$target")
+          fi
+          # A leftover store symlink from the old home.file setup is replaced
+          # by a writable regular file.
+          [ -L "$target" ] && rm -f "$target"
+
+          tmp=$(mktemp "$target.XXXXXX")
+          jq -n --argjson live "$live" --argjson managed "$(yq -o=json '.' ${managed})" \
+            '($live // {}) * $managed' | yq -p=json -o=yaml '.' > "$tmp"
+          chmod 600 "$tmp"
+          mv -f "$tmp" "$target"
+        '';
+      };
     in
     {
       options.my.omp = {
@@ -79,17 +114,49 @@ _: {
 
         settings = lib.mkOption {
           type = lib.types.attrsOf lib.types.anything;
-          default = { };
+          default = {
+            setupVersion = 2;
+            symbolPreset = "ascii";
+
+            theme = {
+              dark = "anthracite";
+            };
+
+            composer = {
+              shape = "box";
+            };
+
+            statusLine = {
+              separator = "ascii";
+            };
+
+            memory = {
+              backend = "mnemopi";
+            };
+
+            startup = {
+              quiet = true;
+            };
+
+            display = {
+              showTurnTime = true;
+            };
+          };
           description = ''
-            omp user settings, written verbatim to ~/.omp/agent/config.yml as YAML.
+            omp settings owned by nix. Deep-merged into ~/.omp/agent/config.yml on
+            every home-manager activation: declared keys always win, all other keys
+            stay writable by omp itself (/settings, /model, omp config set). Removing
+            a key here does not delete it from the live file.
           '';
         };
       };
 
       config = lib.mkIf (cfg.enable && osConfig.my.omp.enable) {
-        home.file.".omp/agent/config.yml" = lib.mkIf (cfg.settings != { }) {
-          text = lib.generators.toYAML { } cfg.settings;
-        };
+        home.activation.ompConfig = lib.mkIf (cfg.settings != { }) (
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            run ${lib.getExe sync}
+          ''
+        );
 
         # The upstream installer links the CLI to ~/.local/bin/omp.
         home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
