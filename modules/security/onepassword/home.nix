@@ -26,6 +26,10 @@ _: {
           settings."*".IdentityAgent = "~/.1password/agent.sock";
         };
 
+        programs.fish.interactiveShellInit = ''
+          set SSH_AUTH_SOCK ~/.1password/agent.sock
+        '';
+
         # Setting this file replaces the agent's default key list, so keep Private.
         xdg.configFile."1Password/ssh/agent.toml" = lib.mkIf (items != [ ]) {
           force = true;
