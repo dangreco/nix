@@ -20,7 +20,6 @@ in
       nixos.desktop
       nixos.dan
       nixos.work
-      nixos.hibernate
       inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
     ];
 
