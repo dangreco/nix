@@ -21,11 +21,14 @@
         programs.fish.interactiveShellInit = ''
           ${lib.getExe gitid} hook fish | source
           ${lib.getExe gitid} completions fish | source
-          ${lib.getExe gitid} sync
+          ${lib.getExe gitid} sync >/dev/null 2>&1
         '';
 
         # The identities and directory mappings.
-        home.persistence."/persist".directories = [ ".config/gitid" ];
+        home.persistence."/persist".directories = [
+          ".config/gitid"
+          ".local/share/gitid"
+        ];
       };
     };
 }
