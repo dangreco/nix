@@ -50,39 +50,69 @@ in
         openssh.authorizedKeys.keys = [ master ];
       };
 
-      home-manager.users.dan = {
-        # Features; each also needs the host side on (my.<feature>.enable) to apply.
-        my = {
-          gnome.enable = true;
-          onepassword.enable = true;
-          devTools.enable = true;
-          zed.enable = true;
-          omp.enable = true;
-        };
+      home-manager.users.dan =
+        { config, ... }:
+        let
+          # Same model shape for all three; only the limits differ.
+          proxyModel = id: name: contextWindow: maxTokens: {
+            inherit
+              id
+              name
+              contextWindow
+              maxTokens
+              ;
+            compat.maxTokensField = "max_tokens";
+          };
+        in
+        {
+          # Features; each also needs the host side on (my.<feature>.enable) to apply.
+          my = {
+            gnome.enable = true;
+            onepassword.enable = true;
+            devTools.enable = true;
+            zed.enable = true;
+            omp.enable = true;
+          };
 
-        programs.git = {
-          enable = true;
-          settings.user = git;
-        };
+          # URL and key come from sops; omp renders them into models.yml.
+          my.omp.models.providers.proxy = {
+            baseUrl = config.sops.placeholder."users/dan/home/omp/base-url";
+            api = "openai-completions";
+            apiKey = config.sops.placeholder."users/dan/home/omp/api-key";
+            models = [
+              (proxyModel "opus" "Opus" 1000000 131072)
+              (proxyModel "sonnet" "Sonnet" 1000000 131072)
+              (proxyModel "haiku" "Haiku" 200000 65536)
+            ];
+          };
 
-        sops = {
-          age.keyFile = "/run/secrets/users/dan/age-key";
-          defaultSopsFile = self + "/secrets/users/dan.yaml";
-          secrets."users/dan/home/smoke" = { };
-        };
+          programs.git = {
+            enable = true;
+            settings.user = git;
+          };
 
-        home.persistence."/persist".directories = [
-          "Documents"
-          "Downloads"
-          "Music"
-          "Pictures"
-          "Videos"
-          "projects"
-          {
-            directory = ".ssh";
-            mode = "0700";
-          }
-        ];
-      };
+          sops = {
+            age.keyFile = "/run/secrets/users/dan/age-key";
+            defaultSopsFile = self + "/secrets/users/dan.yaml";
+            secrets = {
+              "users/dan/home/smoke" = { };
+              "users/dan/home/omp/base-url" = { };
+              "users/dan/home/omp/api-key" = { };
+            };
+          };
+
+          home.persistence."/persist".directories = [
+            "Documents"
+            "Downloads"
+            "Music"
+            "Pictures"
+            "Videos"
+            "projects"
+            {
+              directory = ".ssh";
+              mode = "0700";
+            }
+          ];
+        };
     };
 }

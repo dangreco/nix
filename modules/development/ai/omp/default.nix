@@ -73,14 +73,63 @@ _: {
     }:
     let
       cfg = config.my.omp;
-      target = "${config.home.homeDirectory}/.omp/agent/config.yml";
+      agentDir = "${config.home.homeDirectory}/.omp/agent";
 
-      managed = (pkgs.formats.yaml { }).generate "omp-managed.yml" cfg.settings;
+      # Shared by every user; my.omp.settings is layered on top.
+      baseSettings = {
+        setupVersion = 2;
+        symbolPreset = "ascii";
 
-      # Deep-merges the declared settings over the live config.yml. omp keeps
-      # write access to the file and to every key not declared here; declared
-      # keys are reasserted on each activation. Objects merge, arrays and
-      # scalars are replaced (same rules as omp's own layer merge).
+        theme = {
+          dark = "anthracite";
+        };
+
+        composer = {
+          shape = "box";
+        };
+
+        statusLine = {
+          separator = "ascii";
+        };
+
+        memory = {
+          backend = "mnemopi";
+        };
+
+        startup = {
+          quiet = true;
+        };
+
+        display = {
+          showTurnTime = true;
+        };
+      };
+
+      # Objects merge, arrays and scalars are replaced (omp's own layer rules).
+      settings = lib.recursiveUpdate baseSettings cfg.settings;
+
+      # With sops secrets declared, the files are rendered as sops-nix templates
+      # (placeholders substituted) once sops-nix.service has decrypted them.
+      # Without, the sources are plain store files.
+      hasSecrets = config.sops.secrets != { };
+
+      configSrc =
+        if hasSecrets then
+          config.sops.templates."omp-config.yml".path
+        else
+          pkgs.writeText "omp-config.json" (builtins.toJSON settings);
+
+      modelsSrc =
+        if hasSecrets then
+          config.sops.templates."omp-models.yml".path
+        else
+          pkgs.writeText "omp-models.json" (builtins.toJSON cfg.models);
+
+      # config.yml: deep-merges the declared settings over the live file. omp keeps
+      # write access to the file and to every key not declared here; declared keys
+      # are reasserted on each run.
+      # models.yml: written whole from my.omp.models; only touched when that is non-empty.
+      # Runs from activation and, with secrets, from omp-config.service after sops-nix.
       sync = pkgs.writeShellApplication {
         name = "omp-sync-config";
         runtimeInputs = with pkgs; [
@@ -89,8 +138,17 @@ _: {
           yq-go
         ];
         text = ''
-          target=${lib.escapeShellArg target}
-          mkdir -p "$(dirname "$target")"
+          agentDir=${lib.escapeShellArg agentDir}
+          mkdir -p "$agentDir"
+
+          # Rendered templates only exist after sops-nix.service ran; omp-config.service retries then.
+          need() {
+            [ -r "$1" ] || { echo "omp-sync-config: $1 not rendered yet, skipping" >&2; exit 0; }
+          }
+
+          src=${configSrc}
+          target="$agentDir/config.yml"
+          need "$src"
 
           live='{}'
           if [ -s "$target" ]; then
@@ -101,8 +159,19 @@ _: {
           [ -L "$target" ] && rm -f "$target"
 
           tmp=$(mktemp "$target.XXXXXX")
-          jq -n --argjson live "$live" --argjson managed "$(yq -o=json '.' ${managed})" \
+          jq -n --argjson live "$live" --argjson managed "$(yq -o=json '.' "$src")" \
             '($live // {}) * $managed' | yq -p=json -o=yaml '.' > "$tmp"
+          chmod 600 "$tmp"
+          mv -f "$tmp" "$target"
+        ''
+        + lib.optionalString (cfg.models != { }) ''
+
+          src=${modelsSrc}
+          target="$agentDir/models.yml"
+          need "$src"
+
+          tmp=$(mktemp "$target.XXXXXX")
+          yq -p=json -o=yaml '.' "$src" > "$tmp"
           chmod 600 "$tmp"
           mv -f "$tmp" "$target"
         '';
@@ -114,49 +183,77 @@ _: {
 
         settings = lib.mkOption {
           type = lib.types.attrsOf lib.types.anything;
-          default = {
-            setupVersion = 2;
-            symbolPreset = "ascii";
-
-            theme = {
-              dark = "anthracite";
-            };
-
-            composer = {
-              shape = "box";
-            };
-
-            statusLine = {
-              separator = "ascii";
-            };
-
-            memory = {
-              backend = "mnemopi";
-            };
-
-            startup = {
-              quiet = true;
-            };
-
-            display = {
-              showTurnTime = true;
-            };
-          };
+          default = { };
+          example = lib.literalExpression ''
+            {
+              theme.dark = "nord";
+              modelRoles.default = "my-gateway/claude-sonnet";
+              compaction.remoteEndpoint = "https://summarizer.example/v1/chat/completions";
+            }
+          '';
           description = ''
-            omp settings owned by nix. Deep-merged into ~/.omp/agent/config.yml on
-            every home-manager activation: declared keys always win, all other keys
-            stay writable by omp itself (/settings, /model, omp config set). Removing
-            a key here does not delete it from the live file.
+            Per-user omp settings, layered over the shared defaults of this module
+            (objects merge, arrays and scalars replace) and deep-merged into
+            ~/.omp/agent/config.yml on every home-manager activation: declared keys
+            always win, all other keys stay writable by omp itself (/settings, /model,
+            omp config set). Removing a key here does not delete it from the live file.
+
+            Values may embed sops secrets via `config.sops.placeholder."<secret>"`
+            (the secret must be declared under `sops.secrets`). The value is
+            substituted into a JSON string, so it must not contain `"` or `\`.
+          '';
+        };
+
+        models = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+          example = lib.literalExpression ''
+            {
+              providers.my-gateway = {
+                baseUrl = "https://gateway.example.com/v1";
+                api = "openai-completions";
+                apiKey = config.sops.placeholder."omp/gateway-key";
+              };
+            }
+          '';
+          description = ''
+            Contents of ~/.omp/agent/models.yml. Empty leaves the file alone; otherwise
+            the file is rewritten whole on every activation (omp does not write it, so
+            removed keys disappear). Same secret placeholder rules as `settings`.
           '';
         };
       };
 
       config = lib.mkIf (cfg.enable && osConfig.my.omp.enable) {
-        home.activation.ompConfig = lib.mkIf (cfg.settings != { }) (
-          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            run ${lib.getExe sync}
-          ''
+        sops.templates = lib.mkIf hasSecrets (
+          {
+            "omp-config.yml".content = builtins.toJSON settings;
+          }
+          // lib.optionalAttrs (cfg.models != { }) {
+            "omp-models.yml".content = builtins.toJSON cfg.models;
+          }
         );
+
+        home.activation.ompConfig =
+          lib.hm.dag.entryAfter ([ "writeBoundary" ] ++ lib.optional hasSecrets "sops-nix")
+            ''
+              run ${lib.getExe sync}
+            '';
+
+        # Activation cannot render secrets when the user manager is down (boot, and
+        # every boot on impermanence); sops-nix.service decrypts at login, then this runs.
+        systemd.user.services.omp-config = lib.mkIf hasSecrets {
+          Unit = {
+            Description = "Write omp config.yml and models.yml from sops templates";
+            Wants = [ "sops-nix.service" ];
+            After = [ "sops-nix.service" ];
+          };
+          Service = {
+            Type = "oneshot";
+            ExecStart = lib.getExe sync;
+          };
+          Install.WantedBy = [ "default.target" ];
+        };
 
         # The upstream installer links the CLI to ~/.local/bin/omp.
         home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
