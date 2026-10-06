@@ -23,6 +23,7 @@
 
     programs.fish.interactiveShellInit = ''
       ${self.packages.${pkgs.system}.gitid}/bin/gitid hook fish | source
+      ${self.packages.${pkgs.system}.gitid}/bin/gitid completions fish | source
     '';
 
     sops.secrets."git-credentials" = {
