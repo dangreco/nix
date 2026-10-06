@@ -6,7 +6,6 @@
 let
   master = config.keys.master;
   nixos = config.flake.modules.nixos;
-  hm = config.flake.modules.homeManager;
 in
 {
   keys.hosts.smoke = {
@@ -19,16 +18,18 @@ in
     {
       imports = [
         nixos.base
-        nixos.disk
-        nixos.impermanence
-        nixos.secure-boot
-        nixos.sops
-        nixos.flatpak
-        nixos.podman
-        nixos.openssh
         nixos.dan
         (modulesPath + "/profiles/qemu-guest.nix")
       ];
+
+      my = {
+        disk.enable = true;
+        impermanence.enable = true;
+        secureBoot.enable = true;
+        flatpak.enable = true;
+        podman.enable = true;
+        openssh.enable = true;
+      };
 
       networking.hostName = "smoke";
       nixpkgs.hostPlatform = "x86_64-linux";
@@ -44,10 +45,5 @@ in
 
   flake.nixosConfigurations.smoke = inputs.nixpkgs.lib.nixosSystem {
     modules = [ nixos.smoke ];
-  };
-
-  flake.homeConfigurations."dan@smoke" = inputs.home-manager.lib.homeManagerConfiguration {
-    pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
-    modules = [ hm.dan ];
   };
 }

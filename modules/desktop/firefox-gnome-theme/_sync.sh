@@ -10,7 +10,7 @@
 # profiles.ini does not list. Firefox 147+ uses ~/.config/mozilla/firefox on fresh
 # installs and keeps ~/.mozilla/firefox on existing ones, so both are searched.
 #
-# The preferences the theme needs are set by Firefox policy (see nixos.nix), not
+# The preferences the theme needs are set by Firefox policy (see default.nix), not
 # by editing user.js.
 
 repo=rafaelmardojai/firefox-gnome-theme

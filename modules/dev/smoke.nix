@@ -130,11 +130,6 @@ in
               exit 1
             fi
 
-            hm=$(nix build --no-link --print-out-paths '.#homeConfigurations."dan@smoke".activationPackage')
-            NIX_SSHOPTS="${sshOpts}" nix copy --no-check-sigs --to ssh-ng://root@127.0.0.1 "$hm"
-            # Mirror `home-manager switch`: register the generation in the profile, then activate.
-            u "nix-env --profile ~/.local/state/nix/profiles/home-manager --set $hm && $hm/activate --driver-version 1"
-
             u 'echo eph > ~/eph-marker && echo keep > ~/Documents/keep-marker'
             mid=$(r cat /etc/machine-id)
             u 'podman pull -q docker.io/library/alpine:3 >/dev/null'
@@ -168,10 +163,11 @@ in
             rc=0; u 'test -r /run/secrets/users/dan/age-key' || rc=$?
             verdict system-sops "$rc"
 
+            # Home Manager is part of the system: its activation service rebuilds ~ after the wipe.
             rc=0
-            { [ "$(r systemctl is-active home-manager-restore-dan.service)" = active ] \
+            { [ "$(r systemctl is-active home-manager-dan.service)" = active ] \
               && u 'test -L ~/.config/git/config'; } || rc=$?
-            verdict hm-restore "$rc"
+            verdict hm-activate "$rc"
 
             rc=1
             for _ in $(seq 1 12); do
