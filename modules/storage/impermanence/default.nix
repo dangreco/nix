@@ -23,6 +23,8 @@
                 inherit (cfg) enable;
                 # Keep the bind mounts out of Nautilus/gvfs as ejectable drives, like the system ones.
                 hideMounts = true;
+                # Bind mounts have a non-/ root, so GIO treats them as system-internal and refuses to trash; x-gvfs-trash overrides that.
+                allowTrash = true;
                 # Where upstream installers (zed, omp) put their binaries; one entry here
                 # since impermanence rejects a path listed twice.
                 directories = [ ".local/bin" ];
