@@ -186,6 +186,11 @@ _: {
           "org/gnome/desktop/peripherals/touchpad" = {
             tap-to-click = false;
           };
+          "org/gnome/desktop/wm/keybindings" = {
+            # Mutter's built-in center action (unbound by default): centers the focused window
+            # in its monitor's work area, excluding the top bar.
+            move-to-center = [ "<Super>c" ];
+          };
           "org/gnome/desktop/wm/preferences" = {
             # Leading colon puts the buttons on the right: minimize, maximize, close.
             button-layout = ":minimize,maximize,close";
