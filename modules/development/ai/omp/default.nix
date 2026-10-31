@@ -158,9 +158,15 @@ _: {
           # by a writable regular file.
           [ -L "$target" ] && rm -f "$target"
 
+          # Fallback chains are replaced whole when declared: a deep merge would
+          # keep chains for models that were removed from the declaration.
           tmp=$(mktemp "$target.XXXXXX")
-          jq -n --argjson live "$live" --argjson managed "$(yq -o=json '.' "$src")" \
-            '($live // {}) * $managed' | yq -p=json -o=yaml '.' > "$tmp"
+          jq -n --argjson live "$live" --argjson managed "$(yq -o=json '.' "$src")" '
+            (($live // {}) * $managed)
+            | if ($managed.retry.fallbackChains // null) != null
+              then .retry.fallbackChains = $managed.retry.fallbackChains
+              else . end
+          ' | yq -p=json -o=yaml '.' > "$tmp"
           chmod 600 "$tmp"
           mv -f "$tmp" "$target"
         ''
