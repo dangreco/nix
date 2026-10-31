@@ -48,6 +48,12 @@ in
             gitid.enable = true;
           };
 
+          # Own client key for llm.dangre.co (separate from dan's, revocable on its own).
+          my.omp.llm = {
+            enable = true;
+            apiKeySecret = "users/work/home/omp/llm-api-key";
+          };
+
           home.packages = [
             pkgs.gh
             pkgs.worktrunk
