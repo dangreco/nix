@@ -50,101 +50,56 @@ in
         openssh.authorizedKeys.keys = [ master ];
       };
 
-      home-manager.users.dan =
-        { config, ... }:
-        let
-          # Same model shape for all three; only the limits differ.
-          proxyModel = id: name: contextWindow: maxTokens: {
-            inherit
-              id
-              name
-              contextWindow
-              maxTokens
-              ;
-            compat.maxTokensField = "max_tokens";
-          };
-        in
-        {
-          # Features; each also needs the host side on (my.<feature>.enable) to apply.
-          my = {
-            gnome.enable = true;
-            onepassword.enable = true;
-            devTools.enable = true;
-            zed.enable = true;
-            omp.enable = true;
-          };
-
-          # URL and key come from sops; omp renders them into models.yml.
-          my.omp.models.providers.proxy = {
-            baseUrl = config.sops.placeholder."users/dan/home/omp/base-url";
-            api = "openai-completions";
-            apiKey = config.sops.placeholder."users/dan/home/omp/api-key";
-            models = [
-              (proxyModel "opus" "Opus" 1000000 131072)
-              (proxyModel "sonnet" "Sonnet" 1000000 131072)
-              (proxyModel "haiku" "Haiku" 200000 65536)
-            ];
-          };
-
-          # Bundled z.ai catalog; only the key is overridden, from sops.
-          my.omp.models.providers.zai.apiKey = config.sops.placeholder."users/dan/home/omp/zai-api-key";
-
-          # Claude (via proxy) -> GLM. A model-keyed chain applies in every role.
-          # Context sizes are matched: 1M models fall back to 1M GLMs, haiku to 200K.
-          # glm-5.2/5.3 only take high/max thinking, so the suffix is explicit.
-          my.omp.settings.retry.fallbackChains = {
-            "proxy/opus" = [
-              "zai/glm-5.3:high"
-              "zai/glm-5.2:high"
-            ];
-            "proxy/sonnet" = [
-              "zai/glm-5.2:high"
-              "zai/glm-5.1"
-            ];
-            "proxy/haiku" = [
-              "zai/glm-5-turbo"
-              "zai/glm-4.7-flashx"
-            ];
-          };
-
-          programs.git = {
-            enable = true;
-            settings = {
-              user = git // {
-                signingkey = "key::${master}";
-              };
-              gpg = {
-                format = "ssh";
-                ssh.program = "/run/current-system/sw/bin/op-ssh-sign";
-              };
-              commit.gpgsign = true;
-              tag.gpgsign = true;
-            };
-          };
-
-          sops = {
-            age.keyFile = "/run/secrets/users/dan/age-key";
-            defaultSopsFile = self + "/secrets/users/dan.yaml";
-            secrets = {
-              "users/dan/home/smoke" = { };
-              "users/dan/home/omp/base-url" = { };
-              "users/dan/home/omp/api-key" = { };
-              "users/dan/home/omp/zai-api-key" = { };
-            };
-          };
-
-          home.persistence."/persist".directories = [
-            "Documents"
-            "Downloads"
-            "Music"
-            "Pictures"
-            "Videos"
-            "projects"
-            {
-              directory = ".ssh";
-              mode = "0700";
-            }
-          ];
+      home-manager.users.dan = _: {
+        # Features; each also needs the host side on (my.<feature>.enable) to apply.
+        my = {
+          gnome.enable = true;
+          onepassword.enable = true;
+          devTools.enable = true;
+          zed.enable = true;
+          omp.enable = true;
         };
+
+        my.omp.llm = {
+          enable = true;
+          apiKeySecret = "users/dan/home/omp/llm-api-key";
+        };
+
+        programs.git = {
+          enable = true;
+          settings = {
+            user = git // {
+              signingkey = "key::${master}";
+            };
+            gpg = {
+              format = "ssh";
+              ssh.program = "/run/current-system/sw/bin/op-ssh-sign";
+            };
+            commit.gpgsign = true;
+            tag.gpgsign = true;
+          };
+        };
+
+        sops = {
+          age.keyFile = "/run/secrets/users/dan/age-key";
+          defaultSopsFile = self + "/secrets/users/dan.yaml";
+          secrets = {
+            "users/dan/home/smoke" = { };
+          };
+        };
+
+        home.persistence."/persist".directories = [
+          "Documents"
+          "Downloads"
+          "Music"
+          "Pictures"
+          "Videos"
+          "projects"
+          {
+            directory = ".ssh";
+            mode = "0700";
+          }
+        ];
+      };
     };
 }
