@@ -67,13 +67,24 @@ _: {
           duf
           procs
           xh
+          uv # provides uvx
+          python3
+          # Headless browsing for coding agents (omp drives it over CDP);
+          # the nix package puts a real `chromium` binary on PATH, unlike flatpak.
+          chromium
         ];
+
+        # Downloaded interpreters are generic Linux binaries that do not run on NixOS
+        # without nix-ld; use the Nix-provided python3 instead.
+        home.sessionVariables.UV_PYTHON_DOWNLOADS = "never";
 
         # State the tools build up over time.
         home.persistence."/persist".directories = [
           ".local/share/zoxide" # learned directory ranking
           ".local/share/direnv" # which .envrc files are allowed
           ".cache/tealdeer" # downloaded tldr pages
+          ".cache/uv" # uv wheel and build cache
+          ".local/share/uv" # tools installed with `uv tool install`
         ];
       };
     };
