@@ -109,7 +109,17 @@ in
 
           programs.git = {
             enable = true;
-            settings.user = git;
+            settings = {
+              user = git // {
+                signingkey = "key::${master}";
+              };
+              gpg = {
+                format = "ssh";
+                ssh.program = "/run/current-system/sw/bin/op-ssh-sign";
+              };
+              commit.gpgsign = true;
+              tag.gpgsign = true;
+            };
           };
 
           sops = {
