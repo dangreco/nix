@@ -1,0 +1,47 @@
+# Weekly flake.lock update as a pull request into dev, then every check built on
+# the PR branch. PRs opened with GITHUB_TOKEN do not trigger other workflows, so the
+# checks run here (calling ci.yml) instead of on the PR's own events; see this
+# workflow's run for the results.
+name: Update flake.lock
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  lock:
+    name: Update flake.lock
+    runs-on: ubuntu-latest
+    outputs:
+      pr: ${{ steps.update.outputs.pull-request-number }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - id: update
+        uses: DeterminateSystems/update-flake-lock@v29
+        with:
+          # Conventional commits, like the commitizen hook enforces locally.
+          commit-msg: "chore(flake): update flake.lock"
+          pr-title: "chore(flake): update flake.lock"
+          pr-body: |
+            Automated by the [update-flake-lock](https://github.com/DeterminateSystems/update-flake-lock) action.
+
+            ```
+            {{ env.GIT_COMMIT_MESSAGE }}
+            ```
+
+            Every flake check (hosts, NixOS tests, hooks) is built on this branch by
+            the "Update flake.lock" workflow run that opened this PR.
+
+  check:
+    name: Checks
+    needs: lock
+    if: needs.lock.outputs.pr != ''
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: update_flake_lock_action

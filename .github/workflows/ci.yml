@@ -1,0 +1,63 @@
+# Builds every flake check (checks.x86_64-linux): each host's system closure
+# (dev/hosts-check.nix), the nspawn NixOS tests (dev/tests.nix), the pre-commit
+# hooks and the .sops.yaml check. One job per check, so a failure names its check.
+# No secrets are needed: building a system never decrypts sops files.
+name: CI
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+  workflow_dispatch:
+  # From update-flake-lock.yml, on the lock-update branch.
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to check out and build.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  list:
+    name: List checks
+    runs-on: ubuntu-latest
+    outputs:
+      checks: ${{ steps.list.outputs.checks }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: cachix/install-nix-action@v31
+      - id: list
+        run: echo "checks=$(nix eval --json .#checks.x86_64-linux --apply builtins.attrNames)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.check }}
+    needs: list
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check: ${{ fromJSON(needs.list.outputs.checks) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      # A desktop closure is ~10 GiB plus build inputs; the stock runner leaves
+      # ~20 GB. Must run before Nix is installed.
+      - uses: wimpysworld/nothing-but-nix@v10
+      - uses: cachix/install-nix-action@v31
+        with:
+          # Daemon settings for systemd-nspawn test containers, as in core/base.
+          extra_nix_config: |
+            experimental-features = nix-command flakes auto-allocate-uids cgroups
+            auto-allocate-uids = true
+            extra-system-features = uid-range
+      - run: nix build --print-build-logs --no-link '.#checks.x86_64-linux.${{ matrix.check }}'
