@@ -16,6 +16,7 @@ _: {
             "bootSplash"
             "networkConnections"
             "gnome"
+            "printing"
             "githubAvatar"
             "firefox"
             "firefoxGnomeTheme"
