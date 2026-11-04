@@ -169,6 +169,10 @@ in
               && u 'test -L ~/.config/git/config'; } || rc=$?
             verdict hm-activate "$rc"
 
+            # Prebuilt database linked by Home Manager, and comma on PATH (devTools).
+            rc=0; u 'test -s ~/.cache/nix-index/files && command -v , >/dev/null' || rc=$?
+            verdict nix-index "$rc"
+
             rc=1
             for _ in $(seq 1 12); do
               if [ "$(u 'cat ~/.config/sops-nix/secrets/users/dan/home/smoke' 2>/dev/null)" = smoke-ok ]; then rc=0; break; fi
