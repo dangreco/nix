@@ -313,7 +313,7 @@ install -m 0600 "$tmpkey" /mnt/persist/etc/ssh/ssh_host_ed25519_key
 ssh-keygen -y -f "$tmpkey" > /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub
 nixos-install --flake "$work#$h" --no-root-passwd --no-channel-copy
 
-# ---------------------------------------------------------------- 7. register key, push, leave ~/projects/nix
+# ---------------------------------------------------------------- 7. register key, push, leave ~/projects/dangreco/nix
 git -C "$work" add -A
 if [ -n "$(git -C "$work" status --porcelain)" ]; then
   if [ "$new_host" = 1 ]; then msg="feat(hosts): add $h"; else msg="chore(hosts): update $h"; fi
@@ -357,22 +357,23 @@ if [ "$local_mode" = 0 ]; then
     info "No repo changes to push"
     pushed=1
   fi
-  if [ "$pushed" = 0 ]; then warn "repo changes not pushed; after first login run: cd ~/projects/nix && git push"; fi
+  if [ "$pushed" = 0 ]; then warn "repo changes not pushed; after first login run: cd ~/projects/dangreco/nix && git push"; fi
   git -C "$work" branch -q --set-upstream-to="origin/$branch"
 fi
 
 u=$(nix eval --json "$work#nixosConfigurations.$h.config.my.users" | jq -r '.[0]')
 uid=$(nix eval --json "$work#nixosConfigurations.$h.config.users.users.$u.uid" | jq -r '.')
 gid=$(nix eval --json "$work#nixosConfigurations.$h.config.users.groups.users.gid" | jq -r '.')
-[ "$uid" != null ] || die "user $u has no fixed uid; cannot set up ~/projects/nix"
+[ "$uid" != null ] || die "user $u has no fixed uid; cannot set up ~/projects/dangreco/nix"
 
 install -d -m 0700 -o "$uid" -g "$gid" "/mnt/persist/home/$u"
 install -d -m 0755 -o "$uid" -g "$gid" "/mnt/persist/home/$u/projects"
-dest=/mnt/persist/home/$u/projects/nix
+install -d -m 0755 -o "$uid" -g "$gid" "/mnt/persist/home/$u/projects/dangreco"
+dest=/mnt/persist/home/$u/projects/dangreco/nix
 rm -rf "$dest"
 cp -a "$work" "$dest"
 chown -R "$uid:$gid" "$dest"
-info "Repo checked out at ~/projects/nix for $u"
+info "Repo checked out at ~/projects/dangreco/nix for $u"
 
 shred -u /tmp/secret.key 2>/dev/null || rm -f /tmp/secret.key
 info "Done. Remove the USB and reboot. The first boots enroll Secure Boot keys (auto-reboot); enter the LUKS passphrase each time."

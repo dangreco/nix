@@ -3,7 +3,7 @@ usage() {
   cat <<'EOF'
 usage: update [--pull] [--verbose]
 
-Apply the flake in ~/projects/nix to this machine (NixOS, including every user's Home Manager config).
+Apply the flake in ~/projects/dangreco/nix to this machine (NixOS, including every user's Home Manager config).
 Each step shows only the last three lines of its output; a failed step prints more.
 
   --pull       fast-forward the checkout to the latest origin/dev first
@@ -23,7 +23,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-repo=$HOME/projects/nix
+repo=$HOME/projects/dangreco/nix
 branch=dev
 tail_lines=3
 
