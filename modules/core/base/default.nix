@@ -54,7 +54,14 @@ in
           experimental-features = [
             "nix-command"
             "flakes"
+            # With auto-allocate-uids and uid-range below: what NixOS tests with
+            # systemd-nspawn containers need from the daemon (`nix flake check`
+            # runs one, see dev/tests).
+            "auto-allocate-uids"
+            "cgroups"
           ];
+          auto-allocate-uids = true;
+          extra-system-features = [ "uid-range" ];
           use-xdg-base-directories = true;
         };
         nixpkgs.config.allowUnfree = true;
