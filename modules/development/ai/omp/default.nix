@@ -108,6 +108,18 @@ _: {
       # Objects merge, arrays and scalars are replaced (omp's own layer rules).
       settings = lib.recursiveUpdate baseSettings cfg.settings;
 
+      # Shared MCP servers; my.omp.mcpServers adds to or replaces these by name.
+      baseMcpServers = {
+        # NixOS/Home Manager options and nixpkgs packages from the live search
+        # indexes, so agents look option names up instead of guessing them.
+        nixos = {
+          type = "stdio";
+          command = lib.getExe pkgs.mcp-nixos;
+        };
+      };
+      mcpServers = baseMcpServers // cfg.mcpServers;
+      mcpSrc = pkgs.writeText "omp-mcp.json" (builtins.toJSON mcpServers);
+
       # With sops secrets declared, the files are rendered as sops-nix templates
       # (placeholders substituted) once sops-nix.service has decrypted them.
       # Without, the sources are plain store files.
@@ -125,6 +137,8 @@ _: {
         else
           pkgs.writeText "omp-models.json" (builtins.toJSON cfg.models);
 
+      # mcp.json: each declared server replaces the live entry of the same name;
+      # servers added with /mcp add (or by hand) and the other top-level keys stay.
       # config.yml: deep-merges the declared settings over the live file. omp keeps
       # write access to the file and to every key not declared here; declared keys
       # are reasserted on each run.
@@ -140,6 +154,26 @@ _: {
         text = ''
           agentDir=${lib.escapeShellArg agentDir}
           mkdir -p "$agentDir"
+        ''
+        # First: needs no secrets, so it also runs when the templates below are not
+        # rendered yet.
+        + lib.optionalString (mcpServers != { }) ''
+
+          target="$agentDir/mcp.json"
+          live='{}'
+          if [ -s "$target" ]; then
+            live=$(cat "$target")
+          fi
+          tmp=$(mktemp "$target.XXXXXX")
+          jq -n --argjson live "$live" --slurpfile managed ${mcpSrc} '
+            ($live // {})
+            | ."$schema" //= "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json"
+            | .mcpServers = ((.mcpServers // {}) + $managed[0])
+          ' > "$tmp"
+          chmod 600 "$tmp"
+          mv -f "$tmp" "$target"
+        ''
+        + ''
 
           # Rendered templates only exist after sops-nix.service ran; omp-config.service retries then.
           need() {
@@ -228,6 +262,31 @@ _: {
             removed keys disappear). Same secret placeholder rules as `settings`.
           '';
         };
+
+        mcpServers = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+          default = { };
+          example = lib.literalExpression ''
+            {
+              github = {
+                type = "http";
+                url = "https://api.githubcopilot.com/mcp/";
+                headers.Authorization = "!printf 'Bearer %s' \"$(gh auth token)\"";
+              };
+            }
+          '';
+          description = ''
+            Per-user MCP servers, added to the shared ones of this module (an entry
+            with the same name replaces the shared one) and merged into
+            ~/.omp/agent/mcp.json on every home-manager activation: each declared
+            server replaces the live entry of that name, all other servers and keys
+            stay writable by omp (/mcp add, /mcp disable). Removing a server here
+            does not delete it from the live file. Field reference: omp's
+            mcp-config docs. The file is written from the Nix store, so keep secrets
+            out of it: use omp's `!command` or environment-variable indirection in
+            `env`/`headers`.
+          '';
+        };
       };
 
       config = lib.mkIf (cfg.enable && osConfig.my.omp.enable) {
@@ -250,7 +309,7 @@ _: {
         # every boot on impermanence); sops-nix.service decrypts at login, then this runs.
         systemd.user.services.omp-config = lib.mkIf hasSecrets {
           Unit = {
-            Description = "Write omp config.yml and models.yml from sops templates";
+            Description = "Write omp config.yml, models.yml and mcp.json (with sops templates)";
             Wants = [ "sops-nix.service" ];
             After = [ "sops-nix.service" ];
           };
