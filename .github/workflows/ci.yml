@@ -56,8 +56,17 @@ jobs:
       - uses: cachix/install-nix-action@v31
         with:
           # Daemon settings for systemd-nspawn test containers, as in core/base.
+          # http2 off: runners have hit "Error in the HTTP2 framing layer" from
+          # cache.nixos.org, and the resumed downloads then failed with HTTP 416.
           extra_nix_config: |
             experimental-features = nix-command flakes auto-allocate-uids cgroups
             auto-allocate-uids = true
             extra-system-features = uid-range
-      - run: nix build --print-build-logs --no-link '.#checks.x86_64-linux.${{ matrix.check }}'
+            http2 = false
+      # One more attempt when substitution fails midway: a second run reuses every
+      # path already fetched and starts the failed download fresh. A real build
+      # failure fails both times.
+      - run: |
+          check='.#checks.x86_64-linux.${{ matrix.check }}'
+          nix build --print-build-logs --no-link "$check" \
+            || { echo "::warning::nix build failed; retrying once"; nix build --print-build-logs --no-link "$check"; }
