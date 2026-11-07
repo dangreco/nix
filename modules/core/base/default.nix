@@ -67,6 +67,10 @@ in
         nixpkgs.config.allowUnfree = true;
 
         networking.networkmanager.enable = true;
+        # NetworkManager runs DHCP itself. Facter would otherwise set useDHCP on every
+        # detected interface, starting a second client (dhcpcd) that races NM on the same
+        # link and holds multi-user.target until it gets a lease.
+        hardware.facter.detected.dhcp.enable = false;
 
         time.timeZone = "America/Toronto";
         i18n.defaultLocale = "en_CA.UTF-8";
