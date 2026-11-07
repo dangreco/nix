@@ -60,8 +60,11 @@ in
           ];
 
           # Extra config from the sops-held git-credentials file and an unmanaged config.local.
+          # useConfigOnly: outside a gitid-mapped directory git refuses to commit instead of
+          # inventing work@mezcal as the author.
           programs.git = {
             enable = true;
+            settings.user.useConfigOnly = true;
             includes = [
               { path = config.sops.secrets."git-credentials".path; }
               { path = "~/.config/git/config.local"; }

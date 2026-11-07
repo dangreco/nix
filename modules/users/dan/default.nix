@@ -1,30 +1,34 @@
 { config, self, ... }:
 let
   master = config.keys.master;
-  nixos = config.flake.modules.nixos;
 
   git = {
     name = "Dan Greco";
     email = "git@dangre.co";
   };
+
+  githubHostKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
 in
 {
   keys.users.dan = "age1z623ah3syzzae9lauvukws96w3lsr99tq2a05cc8w7ktnv7mv3lq2sj50p";
 
-  # System-wide git identity and GitHub host key; also used by the installer ISO.
+  # System-wide git identity and GitHub host key for the installer ISO, where root is
+  # the only user. Not imported by `dan`: /etc/gitconfig is every user's fallback, so
+  # it would author other users' (work's) commits as dan; dan's identity is set in his
+  # own Home Manager config below.
   flake.modules.nixos.dan-git = {
     programs.git = {
       enable = true;
       config.user = git;
     };
-    programs.ssh.knownHosts."github.com".publicKey =
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
+    programs.ssh.knownHosts."github.com".publicKey = githubHostKey;
   };
 
   flake.modules.nixos.dan =
     { config, ... }:
     {
-      imports = [ nixos.dan-git ];
+      programs.git.enable = true;
+      programs.ssh.knownHosts."github.com".publicKey = githubHostKey;
 
       my.users = [ "dan" ];
       my.githubUsers.dan = "dangreco";
