@@ -26,6 +26,7 @@ _: {
             "podman"
             "zed"
             "omp"
+            "android"
             "microcontrollers"
           ]
           (_: {
