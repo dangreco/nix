@@ -61,6 +61,7 @@ in
           onepassword.enable = true;
           devTools.enable = true;
           zed.enable = true;
+          croc.enable = true;
           omp.enable = true;
         };
 
