@@ -16,6 +16,13 @@ _: {
 
       users.defaultUserShell = pkgs.fish;
 
+      # Upstream installers (zed, omp) put their CLIs in ~/.local/bin. Set in the PAM
+      # environment so the systemd user manager, GUI apps and every shell inherit it.
+      # home.sessionPath is not enough: hm-session-vars is skipped when
+      # __HM_SESS_VARS_SOURCED leaks in from the systemd user env, and
+      # environment.localBinInPath when fish inherits __fish_nixos_env_preinit_sourced.
+      environment.sessionVariables.PATH = [ "$HOME/.local/bin" ];
+
       # Command history. Universal variables (~/.config/fish/fish_variables) are not
       # persisted: set options in the Home Manager config instead.
       home-manager.sharedModules = [
