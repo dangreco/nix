@@ -1,11 +1,15 @@
 # OMP task routing
 
-Enabled for Dan with `my.omp.router.enable = true`; requires OMP 19.1.0 or later.
+Enabled for Dan and Work with `my.omp.router.enable = true`; requires OMP 19.1.0 or later.
 Like OMP itself, activation requires both host and user `my.omp.enable`. Disabled
 hosts do not evaluate fallback assertions or require OMP secret placeholders.
 The module appends `_router/index.ts` to the configured extensions without replacing
 Superpowers or other user extensions. Activate the Nix/Home Manager configuration,
 then start a new OMP session. No credentials are stored in the extension or Nix store.
+
+Dan and Work use the same Google judge key, encrypted separately in their own
+SOPS files; judge quota and revocation are therefore shared. Their proxy keys and
+user-owned local configuration files remain separate.
 
 ## Local customization without Nix edits
 

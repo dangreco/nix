@@ -54,6 +54,30 @@ in
             apiKeySecret = "users/work/home/omp/llm-api-key";
           };
 
+          # Same native judge as Dan; credentials are encrypted for this user's
+          # own sops recipients. Chat inference keeps Work's separate proxy key.
+          my.omp.models.providers.gemini-decisions = {
+            baseUrl = "https://generativelanguage.googleapis.com/v1beta";
+            api = "google-decisions";
+            apiKey = config.sops.placeholder."users/work/home/omp/gemini-decisions-api-key";
+            auth = "apiKey";
+            models = [
+              {
+                id = "gemini-decision-1";
+                name = "Gemini Decision 1";
+                kind = "judge";
+                reasoning = false;
+                input = [
+                  "text"
+                  "image"
+                ];
+                contextWindow = 262144;
+              }
+            ];
+          };
+          my.omp.settings.modelRoles.judge = lib.mkDefault "gemini-decisions/gemini-decision-1";
+          my.omp.router.enable = true;
+
           home.packages = [
             pkgs.gh
             pkgs.worktrunk
@@ -75,6 +99,7 @@ in
             age.keyFile = "/run/secrets/users/work/age-key";
             defaultSopsFile = self + "/secrets/users/work.yaml";
             secrets."git-credentials" = { };
+            secrets."users/work/home/omp/gemini-decisions-api-key" = { };
           };
 
           dconf.settings."org/gnome/shell" = {
