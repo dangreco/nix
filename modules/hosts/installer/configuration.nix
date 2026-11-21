@@ -43,6 +43,8 @@ in
 
       environment.systemPackages = [
         pkgs.git
+        pkgs.gh
+        pkgs.worktrunk
         pkgs.sbctl
         pkgs._1password-cli
         pkgs.nixos-facter

@@ -36,7 +36,7 @@ in
       };
 
       home-manager.users.work =
-        { config, pkgs, ... }:
+        { config, ... }:
         {
           # Features; each also needs the host side on (my.<feature>.enable) to apply.
           my = {
@@ -77,11 +77,6 @@ in
           };
           my.omp.settings.modelRoles.judge = lib.mkDefault "gemini-decisions/gemini-decision-1";
           my.omp.router.enable = true;
-
-          home.packages = [
-            pkgs.gh
-            pkgs.worktrunk
-          ];
 
           # Extra config from the sops-held git-credentials file and an unmanaged config.local.
           # useConfigOnly: outside a gitid-mapped directory git refuses to commit instead of
