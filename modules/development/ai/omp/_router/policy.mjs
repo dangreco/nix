@@ -8,10 +8,28 @@ export const tiers = {
 export const selector = model => `${model.provider}/${model.id}`;
 const rank = Object.keys(tiers);
 
+// Operator selector globs (routing.local.yml priority/exclude): `*` matches any
+// run of characters, everything else is literal.
+const globs = new Map();
+function globMatches(pattern, value) {
+  if (!globs.has(pattern)) {
+    const literal = pattern.split("*").map(part => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&"));
+    globs.set(pattern, new RegExp(`^${literal.join(".*")}$`));
+  }
+  return globs.get(pattern).test(value);
+}
+export const isExcluded = (patterns = [], value) => patterns.some(pattern => globMatches(pattern, value));
+// Index of the first matching glob; unmatched selectors rank last, equally.
+export function priorityRank(patterns = [], value) {
+  const index = patterns.findIndex(pattern => globMatches(pattern, value));
+  return index < 0 ? patterns.length : index;
+}
+
 export function candidatesFrom(config, available, profiles, tokens, images) {
   const declared = new Set(Object.entries(config.providers ?? {}).flatMap(([provider, value]) =>
     (value.models ?? []).map(model => `${provider}/${model.id}`)));
   return available.filter(model => declared.has(selector(model)) && (model.kind ?? "chat") === "chat"
+    && !isExcluded(profiles.exclude, selector(model))
     && (!images || model.input.includes("image"))
     && Number.isFinite(model.contextWindow) && model.contextWindow > tokens + 8192)
     .map(model => ({ model, profile: profiles.models[selector(model)] ?? {
@@ -36,7 +54,7 @@ export function validateChoice(answer, options) {
   return answer;
 }
 
-export async function route({ candidates, prompt, previous, benchmarks, judge, signal, providerPriority = [] }) {
+export async function route({ candidates, prompt, previous, benchmarks, judge, signal, priority = [] }) {
   if (!candidates.length) throw new Error("no eligible configured models");
   const state = JSON.stringify({ request: prompt.slice(0, 24000), previous: previous.slice(0, 8000) });
   const tier = validateChoice(await judge(state, {
@@ -50,16 +68,13 @@ export async function route({ candidates, prompt, previous, benchmarks, judge, s
   const order = [tier.choice, ...rank.slice(0, requested).reverse(), ...rank.slice(requested + 1)];
   const knownTier = order.find(name => candidates.some(candidate => candidate.profile.tier === name));
   const tiered = candidates.filter(candidate => candidate.profile.tier === knownTier || candidate.profile.tier === "unclassified");
-  // Operator provider priority applies after capability: only the most preferred provider
-  // with a profiled model in the tier competes (unlisted providers rank last, equally).
+  // Operator priority applies after capability: only the earliest priority group
+  // with a profiled model in the tier competes (unmatched models rank last, equally).
   // Its unprofiled models join that pool, so they cannot pull other tiers' work.
-  const priority = candidate => {
-    const index = providerPriority.indexOf(candidate.model.provider);
-    return index < 0 ? providerPriority.length : index;
-  };
+  const rankOf = candidate => priorityRank(priority, selector(candidate.model));
   const anchors = tiered.filter(candidate => candidate.profile.tier === knownTier);
-  const best = Math.min(...(anchors.length ? anchors : tiered).map(priority));
-  const pool = tiered.filter(candidate => priority(candidate) === best);
+  const best = Math.min(...(anchors.length ? anchors : tiered).map(rankOf));
+  const pool = tiered.filter(candidate => rankOf(candidate) === best);
   if (!pool.length || pool.length > 255) throw new Error("unsupported candidate count");
   if (pool.length === 1) return { ...pool[0], requestedTier: tier.choice, probability: tier.probabilities[tier.choice] };
   const options = Object.fromEntries(pool.map(({ model, profile }, index) => [`m${index}`, JSON.stringify({
