@@ -79,7 +79,10 @@ in
         users.mutableUsers = false;
         zramSwap.enable = true;
 
-        environment.systemPackages = [ pkgs.git ];
+        environment.systemPackages = [
+          pkgs.git
+          pkgs.vim
+        ];
 
         system.stateVersion = "26.05";
       };
