@@ -140,7 +140,7 @@ export default function router(pi: ExtensionAPI) {
         const candidates = candidatesFrom(catalog, ctx.models.list(), routingProfiles, tokens,
           !!event.images?.length || historyHasImages);
         return route({ candidates, prompt: event.prompt, previous, benchmarks: routingProfiles.benchmarks,
-          providerPriority: routingProfiles.providerPriority, judge: googleJudge(judgeModel, key), signal });
+          priority: routingProfiles.priority, judge: googleJudge(judgeModel, key), signal });
       });
       if (!stillCurrent()) return;
       if (!await pi.setModel(chosen.model)) throw new Error("selected model unavailable");

@@ -29,7 +29,7 @@ user-owned files under `~/.omp/agent/`:
 |---|---|
 | `models.local.yml` | Add providers/models or override fields of an existing provider/model. |
 | `config.local.yml` | Override settings and roles, add plugins, or specify exact fallback chains. |
-| `routing.local.yml` | Assign custom model tiers/capabilities, optionally supply sourced benchmark evidence, and set provider priority. |
+| `routing.local.yml` | Assign custom model tiers/capabilities, optionally supply sourced benchmark evidence, and set model priority/exclusions. |
 
 Nix, Home Manager and `omp-config.service` **never rewrite these files**. They live
 inside the already-persisted `.omp` directory, so they survive impermanence reboots.
@@ -100,26 +100,36 @@ can be reused only for the exact same benchmark/version/setup interpretation.
 Local evidence is operator-supplied, not independently verified. Descriptions
 and scores are sent to the decision model; do not put secrets in them.
 
-### Provider priority
+### Priority and exclusions
 
-To prefer one provider's models over another's, list provider names (the keys
-under `providers` in `models.yml`), most preferred first, in `routing.local.yml`:
+To prefer some models over others, or to stop using some entirely, list
+`provider/model` globs in `routing.local.yml` (`*` matches anything). The
+provider is the key under `providers` in `models.yml`:
 
 ```yaml
-providerPriority: [personal, llm]
+priority: [personal/*, llm/claude-*, llm/gpt-*]
+exclude: [llm/claude-*-high]
 ```
 
-Capability still comes first: the judge picks the task tier and the tier
-fallback as usual. Within that tier, only the most preferred provider that has
-a **profiled** model there competes; the judge chooses among its models. If that
-provider has no eligible model in the tier (none declared, or excluded by context
-or image needs), the next provider is used. Providers not listed rank after the
-listed ones, equally with each other. An unprofiled model competes only alongside
-its own provider's profiled models in that tier, so an unprofiled preferred model
-cannot draw work from tiers its provider has no profiled model in: profile it to
-make it count.
-Priority affects task routing only; inference fallback chains are unchanged.
-An empty or missing list keeps the judge's choice across all providers.
+`priority` is most preferred first; a model takes the position of the first glob
+it matches, and unmatched models rank after all matched ones, equally.
+
+- **Task routing:** capability still comes first. The judge picks the task tier
+  and the tier fallback as usual. Within that tier, only the earliest priority
+  group with a **profiled** model there competes; the judge chooses among that
+  group's models. If the group has no eligible model in the tier (none declared,
+  or excluded by context or image needs), the next group is used. An unprofiled
+  model competes only alongside its own group's profiled models in that tier, so
+  it cannot draw work from tiers its group has no profiled model in: profile it
+  to make it count.
+- **Generated fallback chains** are reordered (stably) by the same priority, so
+  preferred models are tried first.
+- **`exclude`d models** are never routed to, are removed from generated chains,
+  and are never picked to cover an account; another model of that account is
+  used instead. You can still select them by hand, and explicit
+  `retry.fallbackChains` in `config.local.yml` are left as written.
+
+Empty or missing lists keep the default behavior.
 
 ### Settings, plugins and fallback policy
 
@@ -200,8 +210,8 @@ context estimate. This is a guard, not exact tokenization; OMP still owns compac
 
 Gemini Decision 1 first chooses a task tier, then chooses among eligible models in
 that tier. If the tier has no candidates, stronger tiers are considered before
-weaker tiers. An optional `providerPriority` narrows that tier's choice to the
-most preferred provider (see [Provider priority](#provider-priority)). New models
+weaker tiers. An optional `priority` narrows that tier's choice to the most
+preferred group (see [Priority and exclusions](#priority-and-exclusions)). New models
 without researched profiles remain eligible, explicitly labelled `unclassified`;
 missing benchmark evidence is never treated as zero.
 An unknown model's capabilities come from the live registry, not its name.
@@ -247,10 +257,14 @@ proxy accounts for every declared proxy chat model. `omp-sync-config` extends th
 with compatible local providers and creates chains for custom models as well.
 Same-tier replacements come first, then stronger, then weaker tiers when an account
 lacks an equivalent. Image support is preserved; within a tier sufficient declared
-context is preferred. A smaller-window fallback can still require OMP compaction
-or be unusable for a very large conversation. The four proxy accounts share one
-CLIProxyAPI endpoint: only a genuinely independent local provider can cover that
-proxy/tunnel outage. Explicit local chains take precedence, as described above.
+context is preferred, and remaining ties go to the model declared first in the
+catalog: declare each family newest first, as `llm.nix` does. `priority` then
+reorders each generated chain and `exclude` removes models from it (see
+[Priority and exclusions](#priority-and-exclusions)). A smaller-window fallback can
+still require OMP compaction or be unusable for a very large conversation. The four
+proxy accounts share one CLIProxyAPI endpoint: only a genuinely independent local
+provider can cover that proxy/tunnel outage. Explicit local chains take precedence,
+as described above.
 
 OMP handles inference retries, cooldowns, signed reasoning and fallback restoration.
 Transient provider errors can first spend time in the provider SDK's own retry loop;
