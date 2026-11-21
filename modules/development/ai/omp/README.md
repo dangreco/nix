@@ -18,7 +18,15 @@ always-apply rule, so subagents get it too. It tells agents to manage git worktr
 only with worktrunk (`wt`), using `<ticket>-<slug>` branch names. Worktree placement
 (`<repo>/.worktrees/<branch>`), automatic `wt step prune` and the global `.worktrees/`
 ignore come from `modules/development/worktrees`, which covers every user on every
-host. Add your own rules as other files in `~/.omp/agent/rules/`.
+host.
+
+`_rules/superpowers-artifacts.md` is linked the same way. It overrides Superpowers'
+`docs/superpowers/{specs,plans}/` defaults: specs and plans go to
+`.superpowers/{specs,plans}/` in the main checkout, are never committed, and are
+deleted once the work is merged or discarded. `.superpowers/` (also used by
+Superpowers' brainstorm and SDD scratch) is ignored globally by the same
+`modules/development/worktrees` excludes file. Add your own rules as other files
+in `~/.omp/agent/rules/`.
 
 ## Local customization without Nix edits
 

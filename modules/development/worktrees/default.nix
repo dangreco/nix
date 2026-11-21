@@ -10,10 +10,11 @@ in
   #  - creating a worktree fetches and runs `wt step prune` in the background,
   #    which removes clean worktrees older than an hour whose changes are already
   #    in the remote default branch (squash merges included); dirty ones are kept;
-  #  - `.worktrees/` is ignored by every repository through /etc/gitconfig.
-  #    core.excludesFile replaces git's default ~/.config/git/ignore, so a
-  #    per-user ignore file (Home Manager programs.git.ignores) would have to
-  #    repeat `.worktrees/`.
+  #  - `.worktrees/` and `.superpowers/` (uncommitted agent specs, plans and
+  #    scratch, see the rules in ../ai/omp) are ignored by every repository
+  #    through /etc/gitconfig. core.excludesFile replaces git's default
+  #    ~/.config/git/ignore, so a per-user ignore file (Home Manager
+  #    programs.git.ignores) would have to repeat both.
   # omp agents are told to use wt by the rule in ../ai/omp.
   flake.modules.nixos.worktrees =
     { lib, pkgs, ... }:
@@ -22,7 +23,7 @@ in
 
       programs.git = {
         enable = true;
-        config.core.excludesFile = "${pkgs.writeText "gitignore" ".worktrees/\n"}";
+        config.core.excludesFile = "${pkgs.writeText "gitignore" ".worktrees/\n.superpowers/\n"}";
       };
 
       environment.etc."xdg/worktrunk/config.toml".source =
