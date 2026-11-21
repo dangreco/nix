@@ -1,7 +1,7 @@
 // Provider-qualified profiles and generated cross-account fallback chains.
 // Pure functions: inputs are never mutated and nothing is read from disk or
 // the network, so callers can validate everything before writing any file.
-import { tiers } from "./policy.mjs";
+import { isExcluded, priorityRank, tiers } from "./policy.mjs";
 
 const tierNames = Object.keys(tiers);
 const isObject = value => value !== null && typeof value === "object" && !Array.isArray(value);
@@ -54,21 +54,20 @@ function checkScores(value, where, definitions) {
 }
 
 const selectorPattern = /^[^/\s]+\/\S+$/;
-const providerPattern = /^[^/\s]+$/;
 
-// Ordered provider names; validated here so a typo fails before anything is written.
-function checkProviderPriority(value) {
-  const where = "routing.local.providerPriority";
-  if (!Array.isArray(value) || !value.every(name => typeof name === "string" && providerPattern.test(name))) {
-    fail(where, "must be a list of provider names without spaces or /");
+// Ordered provider/model globs; validated here so a typo fails before anything is written.
+function checkGlobs(value, where) {
+  if (!Array.isArray(value) || !value.every(glob => typeof glob === "string" && selectorPattern.test(glob))) {
+    fail(where, "must be a list of provider/model globs without spaces");
   }
-  if (new Set(value).size !== value.length) fail(where, "must not repeat a provider");
+  if (new Set(value).size !== value.length) fail(where, "must not repeat a glob");
   return [...value];
 }
 
 // base: profiles.json (bare ids, all served by provider "llm").
 // local: routing.local.yml; null/undefined (absent file) means no overrides.
-// providerPriority lists provider names, most preferred first (default: none).
+// priority: provider/model globs, most preferred first; exclude: globs never
+// routed to nor used as generated fallbacks. Both default to none.
 // Operator entries win field by field: an entry that only sets `tier` keeps the
 // remaining researched data of the same provider/id; a model for any other
 // provider starts empty, so same-named llm evidence is never copied across.
@@ -77,8 +76,9 @@ export function mergeProfiles(base, local) {
   if (base.benchmarks !== undefined && !isObject(base.benchmarks)) fail("profiles", "benchmarks must be an object");
   if (local === undefined || local === null) local = {};
   if (!isObject(local)) fail("routing.local", "must be an object");
-  onlyKeys(local, ["models", "benchmarks", "providerPriority"], "routing.local");
-  const providerPriority = checkProviderPriority(local.providerPriority ?? []);
+  onlyKeys(local, ["models", "benchmarks", "priority", "exclude"], "routing.local");
+  const priority = checkGlobs(local.priority ?? [], "routing.local.priority");
+  const exclude = checkGlobs(local.exclude ?? [], "routing.local.exclude");
   const localModels = local.models ?? {};
   const localBenchmarks = local.benchmarks ?? {};
   if (!isObject(localModels)) fail("routing.local.models", "must be an object keyed by provider/id");
@@ -120,11 +120,11 @@ export function mergeProfiles(base, local) {
       ...patch,
     });
   }
-  return { ...base, models: Object.fromEntries(models), benchmarks: definitions, providerPriority };
+  return { ...base, models: Object.fromEntries(models), benchmarks: definitions, priority, exclude };
 }
 
-// Unknown context is 0, not a guessed default: an undeclared candidate counts as
-// insufficient for any source with a declared window, so explicit capacity wins.
+// Unknown context is 0, not a guessed default: an undeclared candidate ranks below
+// any declared one for a source with a declared window, so explicit capacity wins.
 const unknownContext = 0;
 const efforts = new Set(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
 const preferredEffort = { genius: "high", smart: "high", average: "medium", dumb: "low" };
@@ -172,6 +172,8 @@ function configuredChatModels(catalog, profiles) {
       const profiled = Object.hasOwn(profiles.models, selector) ? profiles.models[selector]?.tier : undefined;
       result.push({
         selector, account: accountOf(provider, model.id),
+        // Catalogs declare each family newest first; equal candidates keep that order.
+        index: result.length,
         // Unknown or unclassified models order as "smart": neither promoted nor demoted.
         tier: tierNames.includes(profiled) ? profiled : "smart",
         image: (model.input ?? ["text"]).includes("image"),
@@ -191,9 +193,12 @@ function tierDistance(source, candidate) {
   return delta === 0 ? 0 : delta < 0 ? -delta : tierNames.length + delta;
 }
 
+// Same tier, then enough context (declared short beats undeclared), then the
+// earlier declared (newest) model.
 function compareFor(source) {
-  const score = candidate => 100 * tierDistance(source, candidate) + (candidate.context >= source.context ? 0 : 10);
-  return (a, b) => score(a) - score(b) || b.context - a.context || (a.selector < b.selector ? -1 : a.selector > b.selector ? 1 : 0);
+  const shortfall = candidate => candidate.context >= source.context ? 0 : candidate.context === unknownContext ? 20 : 10;
+  const score = candidate => 100 * tierDistance(source, candidate) + shortfall(candidate);
+  return (a, b) => score(a) - score(b) || a.index - b.index;
 }
 
 function suffixFor(model) {
@@ -206,11 +211,12 @@ function suffixFor(model) {
 // profiles: mergeProfiles() result. existingChains: selector -> [selector[:effort]].
 // Returns selector -> chain for every configured chat model. Existing entries
 // keep their order (even selectors this catalog does not declare, which are
-// never dropped); one best candidate is appended for each account the chain
-// does not yet reach. Models of the same account, the source itself and
-// selectors already present are never appended. No compatible alternative
-// yields an unchanged (possibly empty) chain. Explicit operator chains are
-// layered over the result by the caller.
+// never dropped) unless profiles.exclude matches them; one best candidate is
+// appended for each account the chain does not yet reach. Models of the same
+// account, excluded models, the source itself and selectors already present are
+// never appended. profiles.priority then stably reorders the whole chain. No
+// compatible alternative yields an unchanged (possibly empty) chain. Explicit
+// operator chains are layered over the result by the caller.
 export function extendFallbackChains(catalog, profiles, existingChains) {
   if (profiles === undefined || profiles === null) profiles = { models: {} };
   if (!isObject(profiles) || !isObject(profiles.models)) fail("profiles", "must contain a models object");
@@ -232,20 +238,24 @@ export function extendFallbackChains(catalog, profiles, existingChains) {
     return slash > 0 ? accountOf(selector.slice(0, slash), selector.slice(slash + 1)) : undefined;
   };
 
+  const excluded = selector => isExcluded(profiles.exclude, modelOf(selector));
+  const targets = models.filter(model => !excluded(model.selector));
   const sources = new Set(models.map(model => model.selector));
   const entries = models.map(source => {
-    const existing = chains[source.selector] ?? [];
+    const existing = (chains[source.selector] ?? []).filter(item => !excluded(item));
     const taken = new Set([source.selector, ...existing.map(modelOf)]);
     const covered = new Set([source.account, ...existing.map(item => accountOfSelector(modelOf(item)))]);
     const compare = compareFor(source);
-    const added = [...new Set(models.map(model => model.account))]
+    const added = [...new Set(targets.map(model => model.account))]
       .filter(account => !covered.has(account))
-      .map(account => models
+      .map(account => targets
         .filter(model => model.account === account && !taken.has(model.selector) && (!source.image || model.image))
         .sort(compare)[0])
       .filter(Boolean)
       .sort(compare);
-    return [source.selector, [...existing, ...added.map(model => `${model.selector}${suffixFor(model)}`)]];
+    const chain = [...existing, ...added.map(model => `${model.selector}${suffixFor(model)}`)];
+    return [source.selector, chain.sort((a, b) =>
+      priorityRank(profiles.priority, modelOf(a)) - priorityRank(profiles.priority, modelOf(b)))];
   });
   const untouched = Object.entries(chains).filter(([key]) => !sources.has(key)).map(([key, chain]) => [key, [...chain]]);
   return Object.fromEntries([...entries, ...untouched]);

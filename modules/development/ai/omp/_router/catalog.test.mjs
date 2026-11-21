@@ -82,15 +82,22 @@ test("invalid local routing throws", () => {
   expect(() => mergeProfiles({ models: {}, benchmarks: [] }, {})).toThrow();
 });
 
-test("provider priority is an ordered list of unique provider names", () => {
-  for (const local of [{}, { providerPriority: [] }]) expect(mergeProfiles(base(), local).providerPriority).toEqual([]);
-  const local = { providerPriority: ["work", "llm"] };
+test("priority and exclude are lists of unique provider/model globs", () => {
+  for (const local of [{}, { priority: [], exclude: [] }]) {
+    const merged = mergeProfiles(base(), local);
+    expect(merged.priority).toEqual([]);
+    expect(merged.exclude).toEqual([]);
+  }
+  const local = { priority: ["work/*", "llm/claude-*"], exclude: ["llm/*-high"] };
   const merged = mergeProfiles(base(), local);
-  expect(merged.providerPriority).toEqual(["work", "llm"]);
-  local.providerPriority.push("late");
-  expect(merged.providerPriority).toEqual(["work", "llm"]);
-  for (const providerPriority of ["work", [""], ["work", "work"], ["work/model"], [" work"], [1]]) {
-    expect(() => mergeProfiles(base(), { providerPriority })).toThrow();
+  expect(merged.priority).toEqual(["work/*", "llm/claude-*"]);
+  expect(merged.exclude).toEqual(["llm/*-high"]);
+  local.priority.push("late/*");
+  expect(merged.priority).toEqual(["work/*", "llm/claude-*"]);
+  for (const field of ["priority", "exclude"]) {
+    for (const value of ["work/*", [""], ["work/*", "work/*"], ["work"], ["/x"], [" work/x"], ["work/x y"], [1]]) {
+      expect(() => mergeProfiles(base(), { [field]: value })).toThrow();
+    }
   }
 });
 
@@ -138,8 +145,8 @@ test("four proxy accounts: every chat model reaches every other account, once, w
     const expected = ["anthropic", "antigravity", "chatgpt", "zai"].filter(a => a !== own && !(a === "zai" && source !== "llm/glm-5"));
     expect(ids.map(account).sort()).toEqual(expected.sort());
   }
-  expect(chains["llm/claude-opus-5-5"]).toEqual(["llm/gpt-6.1-sol:high", "llm/claude-opus-5-5-high:high"]);
-  expect(chains["llm/glm-5"]).toEqual(["llm/claude-sonnet-5-5:medium", "llm/gemini-3-flash:medium", "llm/gpt-6.1-terra:medium"]);
+  expect(chains["llm/claude-opus-5-5"]).toEqual(["llm/claude-opus-5-5-high:high", "llm/gpt-6.1-sol:high"]);
+  expect(chains["llm/glm-5"]).toEqual(["llm/claude-sonnet-5-5:medium", "llm/gpt-6.1-terra:medium", "llm/gemini-3-flash:medium"]);
 });
 
 test("same tier beats stronger, stronger beats weaker, weaker is the last resort", () => {
@@ -153,7 +160,7 @@ test("same tier beats stronger, stronger beats weaker, weaker is the last resort
   };
   const tierMap = { "src/a": "average", "p1/strong": "smart", "p1/weak": "dumb", "p1/same": "average", "p2/weak": "dumb", "p2/strong": "genius", "p3/weakest": "dumb", "p3/weak": "dumb" };
   const chains = extendFallbackChains(catalogue, { models: Object.fromEntries(Object.entries(tierMap).map(([k, tier]) => [k, { tier }])) }, {});
-  expect(chains["src/a"]).toEqual(["p1/same", "p2/strong", "p3/weak"]);
+  expect(chains["src/a"]).toEqual(["p1/same", "p2/strong", "p3/weakest"]);
   // Weaker tiers: average beats dumb for a smart source; closest stronger wins over farther.
   const smart = extendFallbackChains({ providers: { src: { models: [{ id: "a" }] }, p: { models: [{ id: "dumb" }, { id: "avg" }] } } },
     { models: { "src/a": { tier: "smart" }, "p/dumb": { tier: "dumb" }, "p/avg": { tier: "average" } } }, {});
@@ -172,7 +179,7 @@ test("image sources only get image-capable targets; text sources may get either"
   const chains = extendFallbackChains(catalogue, { models: {} }, {});
   expect(chains["src/eyes"]).toEqual(["p/sighted"]);
   expect(chains["src/text"]).toEqual(["p/blind", "q/blind"]);
-  expect(chains["q/blind"]).toEqual(["p/blind", "src/eyes"]);
+  expect(chains["q/blind"]).toEqual(["src/eyes", "p/blind"]);
 });
 
 test("missing context is never preferred over explicit sufficient context", () => {
@@ -185,12 +192,12 @@ test("missing context is never preferred over explicit sufficient context", () =
   // Exactly sufficient (boundary) is sufficient; one token short loses to it, and still ranks above undeclared.
   expect(pick({ id: "a", contextWindow: 200000 }, [{ id: "a", contextWindow: 199999 }, { id: "z", contextWindow: 200000 }])).toEqual(["p/z"]);
   expect(pick({ id: "a", contextWindow: 200000 }, [{ id: "a" }, { id: "z", contextWindow: 199999 }])).toEqual(["p/z"]);
-  // Undeclared source: nothing is insufficient, so the larger explicit window still wins the tie and unknowns tie by selector.
-  expect(pick({ id: "a" }, [{ id: "a" }, { id: "z", contextWindow: 1000 }])).toEqual(["p/z"]);
-  expect(pick({ id: "a" }, [{ id: "z" }, { id: "a" }])).toEqual(["p/a"]);
+  // Undeclared source: nothing is insufficient, so ties go to declaration order.
+  expect(pick({ id: "a" }, [{ id: "a" }, { id: "z", contextWindow: 1000 }])).toEqual(["p/a"]);
+  expect(pick({ id: "a" }, [{ id: "z" }, { id: "a" }])).toEqual(["p/z"]);
 });
 
-test("enough context is preferred; unknown contexts add no preference and ties are deterministic", () => {
+test("enough context is preferred and equal candidates go to the newest, declared first", () => {
   const enough = extendFallbackChains({ providers: {
     src: { models: [{ id: "a", contextWindow: 500000 }] },
     p: { models: [{ id: "small", contextWindow: 100000 }, { id: "big", contextWindow: 600000 }] },
@@ -198,10 +205,33 @@ test("enough context is preferred; unknown contexts add no preference and ties a
   } }, { models: { "q/tight": { tier: "smart" }, "q/stronger": { tier: "genius" }, "src/a": { tier: "smart" }, "p/small": { tier: "smart" }, "p/big": { tier: "smart" } } }, {});
   // p: same tier with enough context. q: short same-tier (+10) still beats stronger (+100).
   expect(enough["src/a"]).toEqual(["p/big", "q/tight"]);
+  // Catalogs list each family newest first: an equally short newer model beats an older, larger one.
+  const newest = extendFallbackChains({ providers: {
+    src: { models: [{ id: "a", contextWindow: 1050000 }] },
+    p: { models: [{ id: "claude-opus-5-5", contextWindow: 1000000 }, { id: "claude-opus-4-6", contextWindow: 1000000 }] },
+    q: { models: [{ id: "gpt-6-luna", contextWindow: 272000 }, { id: "gpt-5.6-luna", contextWindow: 372000 }] },
+  } }, { models: {} }, {});
+  expect(newest["src/a"]).toEqual(["p/claude-opus-5-5", "q/gpt-6-luna"]);
   const unknown = { providers: { src: { models: [{ id: "a" }] }, p: { models: [{ id: "b" }, { id: "a" }] } } };
-  expect(extendFallbackChains(unknown, { models: {} }, {})["src/a"]).toEqual(["p/a"]);
-  const reversed = { providers: { src: { models: [{ id: "a" }] }, p: { models: [{ id: "a" }, { id: "b" }] } } };
-  expect(extendFallbackChains(reversed, { models: {} }, {})["src/a"]).toEqual(["p/a"]);
+  expect(extendFallbackChains(unknown, { models: {} }, {})["src/a"]).toEqual(["p/b"]);
+});
+
+test("priority orders whole chains and excluded models are dropped and replaced", () => {
+  const catalogue = catalog();
+  catalogue.providers.work = { models: [m("sol", { contextWindow: 1000000 })] };
+  const ranked = {
+    ...profiles(),
+    priority: ["work/*", "llm/claude-*", "llm/gpt-*", "llm/glm-*", "llm/gemini-*"],
+    exclude: ["llm/*-high"],
+  };
+  const existing = { "llm/claude-opus-5-5": ["llm/claude-opus-5-5-high:high", "llm/gpt-6.1-sol:high"] };
+  const chains = extendFallbackChains(catalogue, ranked, existing);
+  // The excluded antigravity model leaves; Gemini covers that account; work moves to the front.
+  expect(chains["llm/claude-opus-5-5"]).toEqual(["work/sol:high", "llm/gpt-6.1-sol:high", "llm/gemini-3-flash:medium"]);
+  expect(chains["work/sol"]).toEqual(["llm/claude-opus-5-5:high", "llm/gpt-6.1-sol:high", "llm/gemini-3-flash:medium"]);
+  expect(Object.values(chains).flat().some(item => strip(item).endsWith("-high"))).toBe(false);
+  // Without priority or exclusions, existing entries keep their order.
+  expect(extendFallbackChains(catalogue, profiles(), existing)["llm/claude-opus-5-5"].slice(0, 2)).toEqual(existing["llm/claude-opus-5-5"]);
 });
 
 test("custom providers with minimal fields are sources and targets; no thinking suffix without efforts", () => {
@@ -215,7 +245,7 @@ test("custom providers with minimal fields are sources and targets; no thinking 
   expect(chains["llm/glm-5"].at(-1)).toBe("proxy/m1");
   // Unclassified sources order as smart with unknown (0) context; one candidate per account.
   expect(chains["proxy/m1"]).toEqual([
-    "llm/claude-opus-5-5:high", "llm/gpt-6.1-sol:high", "llm/claude-opus-5-5-high:high", "llm/glm-5:low",
+    "llm/claude-opus-5-5:high", "llm/claude-opus-5-5-high:high", "llm/gpt-6.1-sol:high", "llm/glm-5:low",
   ]);
   expect(chains["proxy/m2"]).toEqual(chains["proxy/m1"].map(item => item));
   // Same provider is one account: m1/m2/m3 never chain to each other.
