@@ -75,10 +75,20 @@ _: {
       cfg = config.my.omp;
       agentDir = "${config.home.homeDirectory}/.omp/agent";
 
+      # Load the whole Pi package: its manifest supplies the bootstrap extension
+      # and skills, whose helper scripts rely on the original directory layout.
+      superpowers = pkgs.fetchFromGitHub {
+        owner = "obra";
+        repo = "superpowers";
+        rev = "v7.0.2";
+        hash = "sha256-rP5YsyGuPd9YSW/Fj3aukrq1bLuV+nwwQMK4JaZQgkI=";
+      };
+
       # Shared by every user; my.omp.settings is layered on top.
       baseSettings = {
         setupVersion = 2;
         symbolPreset = "ascii";
+        extensions = [ "${superpowers}" ];
 
         theme = {
           dark = "anthracite";
@@ -237,6 +247,11 @@ _: {
             ~/.omp/agent/config.yml on every home-manager activation: declared keys
             always win, all other keys stay writable by omp itself (/settings, /model,
             omp config set). Removing a key here does not delete it from the live file.
+
+            Shared defaults load obra/superpowers (pinned above) as a Pi-compatible
+            package: all skills plus the using-superpowers bootstrap on each model
+            request. Setting `extensions` here replaces that package list; use
+            `extensions = []` to opt out. Update its revision and hash together.
 
             Values may embed sops secrets via `config.sops.placeholder."<secret>"`
             (the secret must be declared under `sops.secrets`). The value is
