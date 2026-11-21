@@ -7,6 +7,153 @@ The module appends `_router/index.ts` to the configured extensions without repla
 Superpowers or other user extensions. Activate the Nix/Home Manager configuration,
 then start a new OMP session. No credentials are stored in the extension or Nix store.
 
+## Local customization without Nix edits
+
+Every enabled OMP user gets `omp-sync-config`. Keep customizations in these
+user-owned files under `~/.omp/agent/`:
+
+| File | Purpose |
+|---|---|
+| `models.local.yml` | Add providers/models or override fields of an existing provider/model. |
+| `config.local.yml` | Override settings and roles, add plugins, or specify exact fallback chains. |
+| `routing.local.yml` | Assign custom model tiers/capabilities and optionally supply sourced benchmark evidence. |
+
+Nix, Home Manager and `omp-config.service` **never rewrite these files**. They live
+inside the already-persisted `.omp` directory, so they survive impermanence reboots.
+Do not put them in the Nix repository. Use mode `0600` when they contain private
+configuration; prefer credential indirection instead of plaintext API keys.
+
+After editing, run:
+
+```sh
+omp-sync-config
+```
+
+Then start a new OMP session to load changed settings/plugins/fallback chains.
+No Nix edit, rebuild or Home Manager switch is needed. Activation runs the same
+command automatically. The default target is `~/.omp/agent`; advanced users can
+pass `--agent-dir PATH` to compose another profile with the same managed defaults.
+Routing metadata itself is reread on each task.
+
+### Example: a local model
+
+If an Ollama server already serves `qwen3:8b`, add this to `models.local.yml`.
+Set context/output limits to those actually supported by your running server:
+
+```yaml
+providers:
+  personal:
+    api: openai-completions
+    baseUrl: http://127.0.0.1:11434/v1
+    apiKey: ollama
+    models:
+      - id: qwen3:8b
+        name: Personal Qwen
+        reasoning: false
+        input: [text]
+        contextWindow: 32768
+        maxTokens: 8192
+```
+
+For an authenticated remote endpoint, use its API, URL and exact model ID.
+OMP accepts an environment-variable name as `apiKey`, or a command such as
+`apiKey: "!cat ~/.config/omp/personal-api-key"`. The sync command preserves that
+expression; OMP resolves it at runtime. Missing environment variables fall back
+to the literal string, so command-backed credentials are preferable when an
+unset variable should fail closed.
+[Upstream credential resolution](https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/resolve-config-value.ts).
+
+Optionally describe the model in `routing.local.yml`:
+
+```yaml
+models:
+  personal/qwen3:8b:
+    tier: average
+    capabilities: "Local text-only model for bounded edits. Operator-assigned tier, not measured benchmark equivalence."
+    benchmarks: []
+    sources: []
+```
+
+Profiles are keyed by the **full `provider/model` selector**. A similarly named
+model on another provider does not inherit the proxy's benchmark scores. A new
+profile needs a tier; an override of an existing researched profile only needs
+the fields being changed. Omit the profile entirely to keep the model eligible
+as `unclassified`, without invented benchmark evidence.
+
+Optional score entries use `benchmark`, numeric `score`, `unit`, `setup` and
+`source`. Each referenced benchmark must have a definition under top-level
+`benchmarks`, with `description`, `caveat` and `source`. Existing glossary names
+can be reused only for the exact same benchmark/version/setup interpretation.
+Local evidence is operator-supplied, not independently verified. Descriptions
+and scores are sent to the decision model; do not put secrets in them.
+
+### Settings, plugins and fallback policy
+
+`config.local.yml` uses OMP's normal settings shape. For example:
+
+```yaml
+theme:
+  dark: nord
+```
+
+Add plugin paths to its `extensions` list; those are combined with the managed
+extensions, not substituted for them. The plugin files must exist. Plugins
+added directly to live `config.yml` also survive activation. Managed plugins
+still require changing their Nix option to disable them.
+
+Fallback chains are composed from the **merged catalog**, including local
+providers as both sources and targets. The four proxy accounts remain distinct;
+each other provider name is treated as another account. The generator selects
+compatible alternatives using tiers, image support and declared context capacity.
+Unprofiled models use conservative `smart` ordering for fallbacks, but remain
+`unclassified` in routing. Unknown capacity is not assumed sufficient.
+
+Usually no manual chains are needed. To take full control, set
+`retry.fallbackChains` in `config.local.yml`: keys are source `provider/model`
+selectors, values are ordered lists of target selectors with optional `:effort`.
+Each local entry **replaces that source's entire generated chain**, including
+when the value is `[]`. You are responsible for its compatibility and account
+coverage. Other sources retain generated chains. Normal `retry.enabled`,
+`retry.modelFallback` and `retry.fallbackOn` settings still apply.
+
+Distinct provider names do not prove independent infrastructure or credentials.
+Use a genuinely separate endpoint/account to protect against a proxy-wide outage;
+two names pointing at the same proxy are not independent backups.
+
+### Ownership and merge rules
+
+- `models.yml` is generated from **Nix + `models.local.yml`**, not from the previous
+  generated file. Provider objects merge deeply; model lists merge by `id`;
+  local fields win. Other arrays replace. Removing a Nix model removes it unless
+  it is explicitly declared locally. Removing the last adopted catalog clears
+  it too. With no model sources and no prior ownership, an existing native
+  `models.yml` is left alone.
+- Put durable model additions in `models.local.yml`, **not directly in
+  `models.yml`**. Before adopting this setup, move any existing hand-written
+  additions to the local file. Do not copy the entire generated catalog there
+  unless you intend to pin every managed model yourself.
+- Settings precedence is **live `config.yml` < Nix defaults < `config.local.yml`**.
+  Objects merge, arrays/scalars replace, except the additive plugin list and
+  per-selector fallback-chain policy above. Removing an ordinary local-only
+  setting does not erase its previously written live value; remove it from both
+  files when you want OMP's own default again.
+- `.omp-sync-state.json` tracks owned plugin paths, chain keys and catalog
+  ownership, not provider credentials. It lets upgrades remove obsolete managed
+  plugin paths and retired chains without deleting unrelated runtime additions.
+  Keep this file with the agent directory. On first migration, unidentified
+  existing plugins/chains are preserved; known old router paths are removed to
+  avoid loading two routers. An old Superpowers path cannot be reliably identified
+  without prior state, so remove any unwanted old copy once by hand.
+- MCP behavior is unchanged: servers added through `/mcp add` survive activation.
+- Local input parsing and structural validation finish before any native file is
+  written. Invalid input fails visibly and leaves native files unchanged; OMP
+  still validates its complete provider/settings schema when loading them.
+  Native files use atomic replacement at mode `0600`; local inputs are never
+  chmodded or rewritten. The packaged command serializes concurrent syncs.
+- If managed sops templates are not available yet, config/model updates are
+  deferred without overwriting existing files. The login service retries after
+  sops renders them; MCP can update independently.
+
 ## Selection
 
 At each new top-level task, the extension rereads the active profile's `models.yml`
@@ -60,10 +207,14 @@ so and keeps the current model, leaving OMP's inference recovery available. If
 there are no usable chat credentials anywhere, routing cannot manufacture access.
 
 Inference failure is separate: `llm.nix` supplies baseline chains covering all four
-proxy accounts for every declared proxy chat model. Same-tier replacements come
-first, then stronger, then weaker tiers. Image support is preserved and sufficient
-context is preferred. All four accounts share the CLIProxyAPI endpoint; these
-chains do not protect against a proxy-wide outage.
+proxy accounts for every declared proxy chat model. `omp-sync-config` extends these
+with compatible local providers and creates chains for custom models as well.
+Same-tier replacements come first, then stronger, then weaker tiers when an account
+lacks an equivalent. Image support is preserved; within a tier sufficient declared
+context is preferred. A smaller-window fallback can still require OMP compaction
+or be unusable for a very large conversation. The four proxy accounts share one
+CLIProxyAPI endpoint: only a genuinely independent local provider can cover that
+proxy/tunnel outage. Explicit local chains take precedence, as described above.
 
 OMP handles inference retries, cooldowns, signed reasoning and fallback restoration.
 Transient provider errors can first spend time in the provider SDK's own retry loop;
@@ -728,6 +879,13 @@ Z.AI private coding-agent benchmark across effort levels (task completion and ch
 ## Verification
 
 `nix build --no-link path:.#checks.x86_64-linux.omp-router` runs deterministic
-boundary tests for routing, provider-qualified profiles and fallback generation.
-Live smoke tests use isolated agent directories, never production settings.
-They exercise OMP itself and the rendered TUI, not just an extension API stub.
+boundary tests for routing, provider-qualified profiles, cross-account fallback
+generation and the executable sync CLI. Coverage includes repeated activation,
+local precedence, plugin upgrades, retirement, malformed-input preservation,
+sops deferral, native symlinks and file permissions.
+
+Runtime smoke tests use isolated agent directories, never production settings.
+The local-provider smoke runs actual OMP against deterministic HTTP endpoints,
+verifying custom-model selection, rendered tier/model UI, an injected custom-provider
+401 followed by successful cross-provider fallback, and judge HTTP 503 fallback.
+Earlier live-account smoke tests also exercised the real configured providers.

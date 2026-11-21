@@ -152,83 +152,34 @@ _: {
         else
           pkgs.writeText "omp-models.json" (builtins.toJSON cfg.models);
 
-      # mcp.json: each declared server replaces the live entry of the same name;
-      # servers added with /mcp add (or by hand) and the other top-level keys stay.
-      # config.yml: deep-merges the declared settings over the live file. omp keeps
-      # write access to the file and to every key not declared here; declared keys
-      # are reasserted on each run.
-      # models.yml: written whole from my.omp.models; only touched when that is non-empty.
-      # Runs from activation and, with secrets, from omp-config.service after sops-nix.
+      # Bun CLI (_sync.mjs, which imports _router/catalog.mjs and profiles.json, so
+      # the whole module directory is referenced) merges everything before it
+      # writes anything. Native files: mcp.json gets each declared server replaced by
+      # name; config.yml deep-merges managed settings and config.local.yml over the
+      # live file; models.yml is rebuilt from my.omp.models + models.local.yml.
+      # See the my.omp option descriptions for the user-owned *.local.yml files.
+      # Runs from activation and, with secrets, from omp-config.service after sops-nix;
+      # also installed as `omp-sync-config` (extra flags, e.g. --agent-dir, override
+      # the defaults). flock serializes concurrent runs (activation vs. the service).
       sync = pkgs.writeShellApplication {
         name = "omp-sync-config";
-        runtimeInputs = with pkgs; [
-          coreutils
-          jq
-          yq-go
+        runtimeInputs = [
+          pkgs.bun
+          pkgs.coreutils
+          pkgs.util-linux
         ];
         text = ''
-          agentDir=${lib.escapeShellArg agentDir}
-          mkdir -p "$agentDir"
-        ''
-        # First: needs no secrets, so it also runs when the templates below are not
-        # rendered yet.
-        + lib.optionalString (mcpServers != { }) ''
-
-          target="$agentDir/mcp.json"
-          live='{}'
-          if [ -s "$target" ]; then
-            live=$(cat "$target")
-          fi
-          tmp=$(mktemp "$target.XXXXXX")
-          jq -n --argjson live "$live" --slurpfile managed ${mcpSrc} '
-            ($live // {})
-            | ."$schema" //= "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json"
-            | .mcpServers = ((.mcpServers // {}) + $managed[0])
-          ' > "$tmp"
-          chmod 600 "$tmp"
-          mv -f "$tmp" "$target"
-        ''
-        + ''
-
-          # Rendered templates only exist after sops-nix.service ran; omp-config.service retries then.
-          need() {
-            [ -r "$1" ] || { echo "omp-sync-config: $1 not rendered yet, skipping" >&2; exit 0; }
-          }
-
-          src=${configSrc}
-          target="$agentDir/config.yml"
-          need "$src"
-
-          live='{}'
-          if [ -s "$target" ]; then
-            live=$(yq -o=json '.' "$target")
-          fi
-          # A leftover store symlink from the old home.file setup is replaced
-          # by a writable regular file.
-          [ -L "$target" ] && rm -f "$target"
-
-          # Fallback chains are replaced whole when declared: a deep merge would
-          # keep chains for models that were removed from the declaration.
-          tmp=$(mktemp "$target.XXXXXX")
-          jq -n --argjson live "$live" --argjson managed "$(yq -o=json '.' "$src")" '
-            (($live // {}) * $managed)
-            | if ($managed.retry.fallbackChains // null) != null
-              then .retry.fallbackChains = $managed.retry.fallbackChains
-              else . end
-          ' | yq -p=json -o=yaml '.' > "$tmp"
-          chmod 600 "$tmp"
-          mv -f "$tmp" "$target"
-        ''
-        + lib.optionalString (cfg.models != { }) ''
-
-          src=${modelsSrc}
-          target="$agentDir/models.yml"
-          need "$src"
-
-          tmp=$(mktemp "$target.XXXXXX")
-          yq -p=json -o=yaml '.' "$src" > "$tmp"
-          chmod 600 "$tmp"
-          mv -f "$tmp" "$target"
+          umask 077
+          lockDir="''${XDG_RUNTIME_DIR:-$HOME/.cache}/omp"
+          mkdir -p "$lockDir"
+          exec 9>"$lockDir/config-sync.lock"
+          flock 9
+          exec bun ${./.}/_sync.mjs \
+            --agent-dir ${lib.escapeShellArg agentDir} \
+            --config ${lib.escapeShellArg configSrc} \
+            ${lib.optionalString (cfg.models != { }) "--models ${lib.escapeShellArg modelsSrc}"} \
+            ${lib.optionalString (mcpServers != { }) "--mcp ${lib.escapeShellArg mcpSrc}"} \
+            "$@"
         '';
       };
     in
@@ -251,9 +202,10 @@ _: {
           description = ''
             Per-user omp settings, layered over the shared defaults of this module
             (objects merge, arrays and scalars replace) and deep-merged into
-            ~/.omp/agent/config.yml on every home-manager activation: declared keys
-            always win, all other keys stay writable by omp itself (/settings, /model,
-            omp config set). Removing a key here does not delete it from the live file.
+            ~/.omp/agent/config.yml on every home-manager activation. Declared keys
+            win over live runtime settings, but config.local.yml overrides them.
+            Other keys stay writable by omp (/settings, /model, omp config set).
+            Removing an ordinary key here does not delete it from the live file.
 
             Shared defaults load obra/superpowers (pinned above) as a Pi-compatible
             package: all skills plus the using-superpowers bootstrap on each model
@@ -266,6 +218,20 @@ _: {
             Values may embed sops secrets via `config.sops.placeholder."<secret>"`
             (the secret must be declared under `sops.secrets`). The value is
             substituted into a JSON string, so it must not contain `"` or `\`.
+
+            User-owned overlay ~/.omp/agent/config.local.yml (never written by Nix)
+            is deep-merged over these settings and wins. `extensions` of both are
+            unioned. Fallback chains are generated for every configured chat model
+            (catalog.mjs, from the merged models and optional routing.local.yml),
+            then explicit `retry.fallbackChains` entries of config.local.yml
+            override per selector. Ownership of extension paths and chain selectors
+            is recorded in ~/.omp/agent/.omp-sync-state.json (no secrets): later
+            runs remove paths and chains Nix no longer provides, but keep plugins
+            and chains added at runtime. The first run after the upgrade has no
+            record and keeps everything except an obsolete store copy of the
+            managed router. If the sops templates are not rendered yet, config.yml
+            and models.yml stay as they are (reported as deferred) while mcp.json
+            still updates.
           '';
         };
 
@@ -282,9 +248,16 @@ _: {
             }
           '';
           description = ''
-            Contents of ~/.omp/agent/models.yml. Empty leaves the file alone; otherwise
-            the file is rewritten whole on every activation (omp does not write it, so
-            removed keys disappear). Same secret placeholder rules as `settings`.
+            Managed contents of ~/.omp/agent/models.yml. The native file is rebuilt
+            whole on every run from this option plus the optional user-owned
+            ~/.omp/agent/models.local.yml (same schema; never written by Nix):
+            providers deep-merge, each provider's `models` list merges by `id` with
+            local fields winning, so models retired here disappear and local ones
+            stay. With this option empty and no local models, a never-managed native
+            file is left alone; a previously adopted catalog is cleared. With only
+            a local file it is generated from that. Malformed local YAML, a
+            non-mapping root or repeated model ids abort the sync before writing.
+            Same secret placeholder rules as `settings`.
           '';
         };
 
@@ -309,7 +282,8 @@ _: {
             does not delete it from the live file. Field reference: omp's
             mcp-config docs. The file is written from the Nix store, so keep secrets
             out of it: use omp's `!command` or environment-variable indirection in
-            `env`/`headers`.
+            `env`/`headers`. There is no local overlay for MCP: servers added with
+            /mcp add are already preserved.
           '';
         };
       };
@@ -324,6 +298,9 @@ _: {
           }
         );
 
+        home.packages = [ sync ];
+
+        # Invalid local inputs fail visibly before native configuration is changed.
         home.activation.ompConfig =
           lib.hm.dag.entryAfter ([ "writeBoundary" ] ++ lib.optional hasSecrets "sops-nix")
             ''
