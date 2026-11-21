@@ -1,5 +1,5 @@
 # Nightly flake.lock PR into dev; all flake checks must pass before squash-merge.
-# GITHUB_TOKEN PRs do not trigger CI, so call ci.yml on the captured head SHA.
+# GITHUB_TOKEN PRs do not trigger CI, so call flake-checks.yml on the captured SHA.
 # The merge uses that same SHA: a changed head must be checked in a new run.
 # No lock diff skips checks/merge; failed checks leave the PR open for the next run.
 name: Update flake.lock
@@ -75,7 +75,7 @@ jobs:
     name: Checks
     needs: lock
     if: needs.lock.outputs.pr != ''
-    uses: ./.github/workflows/ci.yml
+    uses: ./.github/workflows/flake-checks.yml
     with:
       ref: ${{ needs.lock.outputs.sha }}
 
@@ -90,8 +90,8 @@ jobs:
       PR_NUMBER: ${{ needs.lock.outputs.pr }}
       HEAD_SHA: ${{ needs.lock.outputs.sha }}
     steps:
-      # Deliberately merge here, not --auto: dev has no required checks, so
-      # GitHub auto-merge alone would not wait for this workflow's full matrix.
+      # Merge only after the full matrix and its protected aggregate gate pass.
+      # A moved base requires updating the PR and rerunning checks, not a bypass.
       - name: Squash-merge the tested commit
         run: |
           gh pr merge "$PR_NUMBER" --squash --match-head-commit "$HEAD_SHA" \

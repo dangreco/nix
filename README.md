@@ -17,3 +17,7 @@ nix flake check
 ```
 
 Flake inputs update nightly and merge automatically after CI passes.
+
+Changes to `dev` require an up-to-date PR, passing CI, and resolved review threads;
+no reviewer approval is required. Squash/rebase merges only; no force-pushes,
+deletion, or bypass actors. [Ruleset configuration](.github/rulesets/dev.json).

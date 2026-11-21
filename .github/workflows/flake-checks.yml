@@ -1,0 +1,75 @@
+# Shared by human PR CI and nightly lock updates. Both callers use the job name
+# "Checks", yielding the same protected status: "Checks / Required checks".
+# No secrets are needed: building a system never decrypts sops files.
+name: Flake checks
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Exact commit SHA to check out and build.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  list:
+    name: List checks
+    runs-on: ubuntu-latest
+    outputs:
+      checks: ${{ steps.list.outputs.checks }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: cachix/install-nix-action@v31
+      - id: list
+        run: echo "checks=$(nix eval --json .#checks.x86_64-linux --apply builtins.attrNames)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.check }}
+    needs: list
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check: ${{ fromJSON(needs.list.outputs.checks) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      # A desktop closure is ~10 GiB plus build inputs; the stock runner leaves
+      # ~20 GB. Must run before Nix is installed.
+      - uses: wimpysworld/nothing-but-nix@v10
+      - uses: cachix/install-nix-action@v31
+        with:
+          # Daemon settings for systemd-nspawn test containers, as in core/base.
+          # http2 off: runners have hit "Error in the HTTP2 framing layer" from
+          # cache.nixos.org, and the resumed downloads then failed with HTTP 416.
+          extra_nix_config: |
+            experimental-features = nix-command flakes auto-allocate-uids cgroups
+            auto-allocate-uids = true
+            extra-system-features = uid-range
+            http2 = false
+      # Retry once to reuse already fetched paths after a substitution failure.
+      - run: |
+          check='.#checks.x86_64-linux.${{ matrix.check }}'
+          nix build --print-build-logs --no-link "$check" \
+            || { echo "::warning::nix build failed; retrying once"; nix build --print-build-logs --no-link "$check"; }
+
+  required:
+    name: Required checks
+    needs: [list, build]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      LIST_RESULT: ${{ needs.list.result }}
+      BUILD_RESULT: ${{ needs.build.result }}
+    steps:
+      # A skipped/failed/cancelled dependency must not produce a green gate.
+      - name: Require every flake check to pass
+        run: |
+          test "$LIST_RESULT" = success
+          test "$BUILD_RESULT" = success

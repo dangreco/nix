@@ -1,7 +1,5 @@
-# Builds every flake check (checks.x86_64-linux): each host's system closure
-# (dev/hosts-check.nix), the nspawn NixOS tests (dev/tests.nix), the pre-commit
-# hooks and the .sops.yaml check. One job per check, so a failure names its check.
-# No secrets are needed: building a system never decrypts sops files.
+# Human PRs and nightly lock updates call the same full-matrix workflow under
+# "Checks", so branch protection requires one stable aggregate check name.
 name: CI
 
 on:
@@ -9,64 +7,17 @@ on:
     branches: [dev]
   pull_request:
   workflow_dispatch:
-  # From update-flake-lock.yml, on the exact lock-update commit SHA.
-  workflow_call:
-    inputs:
-      ref:
-        description: Git ref or exact commit SHA to check out and build.
-        type: string
-        required: true
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ inputs.ref || github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  list:
-    name: List checks
-    runs-on: ubuntu-latest
-    outputs:
-      checks: ${{ steps.list.outputs.checks }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.ref }}
-      - uses: cachix/install-nix-action@v31
-      - id: list
-        run: echo "checks=$(nix eval --json .#checks.x86_64-linux --apply builtins.attrNames)" >> "$GITHUB_OUTPUT"
-
-  build:
-    name: ${{ matrix.check }}
-    needs: list
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        check: ${{ fromJSON(needs.list.outputs.checks) }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.ref }}
-      # A desktop closure is ~10 GiB plus build inputs; the stock runner leaves
-      # ~20 GB. Must run before Nix is installed.
-      - uses: wimpysworld/nothing-but-nix@v10
-      - uses: cachix/install-nix-action@v31
-        with:
-          # Daemon settings for systemd-nspawn test containers, as in core/base.
-          # http2 off: runners have hit "Error in the HTTP2 framing layer" from
-          # cache.nixos.org, and the resumed downloads then failed with HTTP 416.
-          extra_nix_config: |
-            experimental-features = nix-command flakes auto-allocate-uids cgroups
-            auto-allocate-uids = true
-            extra-system-features = uid-range
-            http2 = false
-      # One more attempt when substitution fails midway: a second run reuses every
-      # path already fetched and starts the failed download fresh. A real build
-      # failure fails both times.
-      - run: |
-          check='.#checks.x86_64-linux.${{ matrix.check }}'
-          nix build --print-build-logs --no-link "$check" \
-            || { echo "::warning::nix build failed; retrying once"; nix build --print-build-logs --no-link "$check"; }
+  check:
+    name: Checks
+    uses: ./.github/workflows/flake-checks.yml
+    with:
+      ref: ${{ github.sha }}
