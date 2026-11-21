@@ -86,7 +86,10 @@ _: {
 
       # Shared by every user; my.omp.settings is layered on top.
       baseSettings = {
-        setupVersion = 2;
+        # Matches omp's CURRENT_SETUP_VERSION (3 as of 19.1). Lower values re-run
+        # newer setup steps (e.g. the auto-update prompt) on every launch, since
+        # these defaults override what the wizard writes to config.yml.
+        setupVersion = 3;
         symbolPreset = "ascii";
         extensions = [ "${superpowers}" ];
 
@@ -372,9 +375,6 @@ _: {
           };
           Install.WantedBy = [ "default.target" ];
         };
-
-        # The upstream installer links the CLI to ~/.local/bin/omp.
-        home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
         # omp's state; the binary sits in ~/.local/bin, persisted in storage/impermanence.
         home.persistence."/persist".directories = [
