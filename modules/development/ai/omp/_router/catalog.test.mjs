@@ -82,6 +82,18 @@ test("invalid local routing throws", () => {
   expect(() => mergeProfiles({ models: {}, benchmarks: [] }, {})).toThrow();
 });
 
+test("provider priority is an ordered list of unique provider names", () => {
+  for (const local of [{}, { providerPriority: [] }]) expect(mergeProfiles(base(), local).providerPriority).toEqual([]);
+  const local = { providerPriority: ["work", "llm"] };
+  const merged = mergeProfiles(base(), local);
+  expect(merged.providerPriority).toEqual(["work", "llm"]);
+  local.providerPriority.push("late");
+  expect(merged.providerPriority).toEqual(["work", "llm"]);
+  for (const providerPriority of ["work", [""], ["work", "work"], ["work/model"], [" work"], [1]]) {
+    expect(() => mergeProfiles(base(), { providerPriority })).toThrow();
+  }
+});
+
 // ---- fallback chains ----
 
 const vision = ["text", "image"];
