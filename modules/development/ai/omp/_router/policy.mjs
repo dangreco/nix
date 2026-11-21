@@ -36,7 +36,7 @@ export function validateChoice(answer, options) {
   return answer;
 }
 
-export async function route({ candidates, prompt, previous, benchmarks, judge, signal }) {
+export async function route({ candidates, prompt, previous, benchmarks, judge, signal, providerPriority = [] }) {
   if (!candidates.length) throw new Error("no eligible configured models");
   const state = JSON.stringify({ request: prompt.slice(0, 24000), previous: previous.slice(0, 8000) });
   const tier = validateChoice(await judge(state, {
@@ -49,7 +49,17 @@ export async function route({ candidates, prompt, previous, benchmarks, judge, s
   const requested = rank.indexOf(tier.choice);
   const order = [tier.choice, ...rank.slice(0, requested).reverse(), ...rank.slice(requested + 1)];
   const knownTier = order.find(name => candidates.some(candidate => candidate.profile.tier === name));
-  const pool = candidates.filter(candidate => candidate.profile.tier === knownTier || candidate.profile.tier === "unclassified");
+  const tiered = candidates.filter(candidate => candidate.profile.tier === knownTier || candidate.profile.tier === "unclassified");
+  // Operator provider priority applies after capability: only the most preferred provider
+  // with a profiled model in the tier competes (unlisted providers rank last, equally).
+  // Its unprofiled models join that pool, so they cannot pull other tiers' work.
+  const priority = candidate => {
+    const index = providerPriority.indexOf(candidate.model.provider);
+    return index < 0 ? providerPriority.length : index;
+  };
+  const anchors = tiered.filter(candidate => candidate.profile.tier === knownTier);
+  const best = Math.min(...(anchors.length ? anchors : tiered).map(priority));
+  const pool = tiered.filter(candidate => priority(candidate) === best);
   if (!pool.length || pool.length > 255) throw new Error("unsupported candidate count");
   if (pool.length === 1) return { ...pool[0], requestedTier: tier.choice, probability: tier.probabilities[tier.choice] };
   const options = Object.fromEntries(pool.map(({ model, profile }, index) => [`m${index}`, JSON.stringify({

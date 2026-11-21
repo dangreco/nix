@@ -29,7 +29,7 @@ user-owned files under `~/.omp/agent/`:
 |---|---|
 | `models.local.yml` | Add providers/models or override fields of an existing provider/model. |
 | `config.local.yml` | Override settings and roles, add plugins, or specify exact fallback chains. |
-| `routing.local.yml` | Assign custom model tiers/capabilities and optionally supply sourced benchmark evidence. |
+| `routing.local.yml` | Assign custom model tiers/capabilities, optionally supply sourced benchmark evidence, and set provider priority. |
 
 Nix, Home Manager and `omp-config.service` **never rewrite these files**. They live
 inside the already-persisted `.omp` directory, so they survive impermanence reboots.
@@ -99,6 +99,27 @@ Optional score entries use `benchmark`, numeric `score`, `unit`, `setup` and
 can be reused only for the exact same benchmark/version/setup interpretation.
 Local evidence is operator-supplied, not independently verified. Descriptions
 and scores are sent to the decision model; do not put secrets in them.
+
+### Provider priority
+
+To prefer one provider's models over another's, list provider names (the keys
+under `providers` in `models.yml`), most preferred first, in `routing.local.yml`:
+
+```yaml
+providerPriority: [personal, llm]
+```
+
+Capability still comes first: the judge picks the task tier and the tier
+fallback as usual. Within that tier, only the most preferred provider that has
+a **profiled** model there competes; the judge chooses among its models. If that
+provider has no eligible model in the tier (none declared, or excluded by context
+or image needs), the next provider is used. Providers not listed rank after the
+listed ones, equally with each other. An unprofiled model competes only alongside
+its own provider's profiled models in that tier, so an unprofiled preferred model
+cannot draw work from tiers its provider has no profiled model in: profile it to
+make it count.
+Priority affects task routing only; inference fallback chains are unchanged.
+An empty or missing list keeps the judge's choice across all providers.
 
 ### Settings, plugins and fallback policy
 
@@ -179,8 +200,10 @@ context estimate. This is a guard, not exact tokenization; OMP still owns compac
 
 Gemini Decision 1 first chooses a task tier, then chooses among eligible models in
 that tier. If the tier has no candidates, stronger tiers are considered before
-weaker tiers. New models without researched profiles remain eligible, explicitly
-labelled `unclassified`; missing benchmark evidence is never treated as zero.
+weaker tiers. An optional `providerPriority` narrows that tier's choice to the
+most preferred provider (see [Provider priority](#provider-priority)). New models
+without researched profiles remain eligible, explicitly labelled `unclassified`;
+missing benchmark evidence is never treated as zero.
 An unknown model's capabilities come from the live registry, not its name.
 
 | Tier | Reference class | Intended work | Requested effort |

@@ -54,9 +54,21 @@ function checkScores(value, where, definitions) {
 }
 
 const selectorPattern = /^[^/\s]+\/\S+$/;
+const providerPattern = /^[^/\s]+$/;
+
+// Ordered provider names; validated here so a typo fails before anything is written.
+function checkProviderPriority(value) {
+  const where = "routing.local.providerPriority";
+  if (!Array.isArray(value) || !value.every(name => typeof name === "string" && providerPattern.test(name))) {
+    fail(where, "must be a list of provider names without spaces or /");
+  }
+  if (new Set(value).size !== value.length) fail(where, "must not repeat a provider");
+  return [...value];
+}
 
 // base: profiles.json (bare ids, all served by provider "llm").
 // local: routing.local.yml; null/undefined (absent file) means no overrides.
+// providerPriority lists provider names, most preferred first (default: none).
 // Operator entries win field by field: an entry that only sets `tier` keeps the
 // remaining researched data of the same provider/id; a model for any other
 // provider starts empty, so same-named llm evidence is never copied across.
@@ -65,7 +77,8 @@ export function mergeProfiles(base, local) {
   if (base.benchmarks !== undefined && !isObject(base.benchmarks)) fail("profiles", "benchmarks must be an object");
   if (local === undefined || local === null) local = {};
   if (!isObject(local)) fail("routing.local", "must be an object");
-  onlyKeys(local, ["models", "benchmarks"], "routing.local");
+  onlyKeys(local, ["models", "benchmarks", "providerPriority"], "routing.local");
+  const providerPriority = checkProviderPriority(local.providerPriority ?? []);
   const localModels = local.models ?? {};
   const localBenchmarks = local.benchmarks ?? {};
   if (!isObject(localModels)) fail("routing.local.models", "must be an object keyed by provider/id");
@@ -107,7 +120,7 @@ export function mergeProfiles(base, local) {
       ...patch,
     });
   }
-  return { ...base, models: Object.fromEntries(models), benchmarks: definitions };
+  return { ...base, models: Object.fromEntries(models), benchmarks: definitions, providerPriority };
 }
 
 // Unknown context is 0, not a guessed default: an undeclared candidate counts as
