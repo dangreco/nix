@@ -119,8 +119,51 @@ _: {
         };
       };
 
+      # With the router on, its tier emoji (an extension status) sits right before
+      # the model instead of in a footer line: omp's `default` preset (19.x
+      # segments and options) with `status` inserted. omp separates every segment,
+      # so it renders as `π > 🤓 > [high] Opus 5.5`.
+      routerSettings = lib.optionalAttrs cfg.router.enable {
+        statusLine = {
+          preset = "custom";
+          showHookStatus = false;
+          leftSegments = [
+            "pi"
+            "vim"
+            "status"
+            "model"
+            "mode"
+            "collab"
+            "stream"
+            "path"
+            "git"
+            "pr"
+            "context_pct"
+            "cost"
+          ];
+          rightSegments = [ "session_name" ];
+          segmentOptions = {
+            model.showThinkingLevel = true;
+            path = {
+              abbreviate = true;
+              maxLength = 40;
+              stripWorkPrefix = true;
+            };
+            git = {
+              showBranch = true;
+              showStaged = true;
+              showUnstaged = true;
+              showUntracked = true;
+            };
+          };
+        };
+      };
+
       # Objects merge, arrays and scalars are replaced (omp's own layer rules).
-      userSettings = lib.recursiveUpdate baseSettings cfg.settings;
+      userSettings = lib.foldl' lib.recursiveUpdate baseSettings [
+        routerSettings
+        cfg.settings
+      ];
       settings =
         userSettings
         // lib.optionalAttrs cfg.router.enable {
