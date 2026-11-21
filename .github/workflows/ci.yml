@@ -6,7 +6,14 @@ name: CI
 on:
   push:
     branches: [dev]
+  # PRs opened by github-actions[bot] wait for a maintainer's approval before any
+  # workflow runs. Both kinds are fully checked by the workflow that opens them, so
+  # they are skipped here: release PRs are the only PRs into main, and lock-update
+  # PRs change only flake.lock. A human PR changing only flake.lock gets its required
+  # check by running this workflow manually on its branch.
   pull_request:
+    branches: [dev]
+    paths-ignore: [flake.lock]
   workflow_dispatch:
     inputs:
       full:
