@@ -1,6 +1,14 @@
 # Shared by human PR CI and nightly lock updates. Both callers use the job name
 # "Checks", yielding the same protected status: "Checks / Required checks".
 # No secrets are needed: building a system never decrypts sops files.
+#
+# quick (default): one job. `nix flake check --no-build` evaluates every check and
+# host closure (module errors, assertions, missing options), then builds the light
+# checks. Heavy checks (host-* closures, nixos-* tests) are only evaluated: their
+# ~10 GiB downloads are what made CI slow, and a config change that evaluates
+# rarely fails to build.
+# full: every check built, one job per check. Nightly lock updates (new inputs, where
+# real build breakage happens) and manual "CI" runs with full=true.
 name: Flake checks
 
 on:
@@ -10,13 +18,43 @@ on:
         description: Exact commit SHA to check out and build.
         type: string
         required: true
+      full:
+        description: Build every check, including host closures and NixOS tests.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
+  quick:
+    name: Evaluate and build light checks
+    if: ${{ !inputs.full }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: cachix/install-nix-action@v31
+        with:
+          # http2 off: runners have hit "Error in the HTTP2 framing layer" from
+          # cache.nixos.org, and the resumed downloads then failed with HTTP 416.
+          extra_nix_config: |
+            http2 = false
+      - name: Evaluate every check and host
+        run: nix flake check --no-build
+      # Heavy checks follow a naming convention: host-* (dev/hosts-check.nix) and
+      # nixos-* (dev/tests.nix). Everything else is built here.
+      - name: Build light checks
+        run: |
+          mapfile -t checks < <(nix eval --raw .#checks.x86_64-linux --apply '
+            cs: builtins.concatStringsSep "\n" (builtins.filter
+              (n: builtins.match "(host|nixos)-.*" n == null) (builtins.attrNames cs))')
+          nix build --print-build-logs --no-link "${checks[@]/#/.#checks.x86_64-linux.}"
+
   list:
     name: List checks
+    if: ${{ inputs.full }}
     runs-on: ubuntu-latest
     outputs:
       checks: ${{ steps.list.outputs.checks }}
@@ -46,8 +84,6 @@ jobs:
       - uses: cachix/install-nix-action@v31
         with:
           # Daemon settings for systemd-nspawn test containers, as in core/base.
-          # http2 off: runners have hit "Error in the HTTP2 framing layer" from
-          # cache.nixos.org, and the resumed downloads then failed with HTTP 416.
           extra_nix_config: |
             experimental-features = nix-command flakes auto-allocate-uids cgroups
             auto-allocate-uids = true
@@ -61,15 +97,21 @@ jobs:
 
   required:
     name: Required checks
-    needs: [list, build]
+    needs: [quick, list, build]
     if: always()
     runs-on: ubuntu-latest
     env:
+      FULL: ${{ inputs.full }}
+      QUICK_RESULT: ${{ needs.quick.result }}
       LIST_RESULT: ${{ needs.list.result }}
       BUILD_RESULT: ${{ needs.build.result }}
     steps:
-      # A skipped/failed/cancelled dependency must not produce a green gate.
-      - name: Require every flake check to pass
+      # The selected tier must succeed; a skipped/failed/cancelled job never passes.
+      - name: Require the selected tier to pass
         run: |
-          test "$LIST_RESULT" = success
-          test "$BUILD_RESULT" = success
+          if [ "$FULL" = true ]; then
+            test "$LIST_RESULT" = success
+            test "$BUILD_RESULT" = success
+          else
+            test "$QUICK_RESULT" = success
+          fi

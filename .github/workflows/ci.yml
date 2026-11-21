@@ -1,5 +1,6 @@
-# Human PRs and nightly lock updates call the same full-matrix workflow under
-# "Checks", so branch protection requires one stable aggregate check name.
+# Human PRs and nightly lock updates call the same workflow under "Checks", so
+# branch protection requires one stable aggregate check name. PRs and pushes run
+# the quick tier; run this workflow manually with full=true to build everything.
 name: CI
 
 on:
@@ -7,6 +8,11 @@ on:
     branches: [dev]
   pull_request:
   workflow_dispatch:
+    inputs:
+      full:
+        description: Build every check, including host closures and NixOS tests.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -21,3 +27,4 @@ jobs:
     uses: ./.github/workflows/flake-checks.yml
     with:
       ref: ${{ github.sha }}
+      full: ${{ inputs.full == true }}
