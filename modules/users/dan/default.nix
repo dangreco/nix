@@ -54,7 +54,7 @@ in
         openssh.authorizedKeys.keys = [ master ];
       };
 
-      home-manager.users.dan = _: {
+      home-manager.users.dan = { config, lib, ... }: {
         # Features; each also needs the host side on (my.<feature>.enable) to apply.
         my = {
           gnome.enable = true;
@@ -69,6 +69,31 @@ in
           enable = true;
           apiKeySecret = "users/dan/home/omp/llm-api-key";
         };
+
+        # Native calibrated judgments, separate from the subscription-backed proxy.
+        # Requires omp 19.1.0+ for google-decisions; no text tokens are generated.
+        # https://aistudio.google.com/docs/models/gemini-decision-1
+        my.omp.models.providers.gemini-decisions = {
+          baseUrl = "https://generativelanguage.googleapis.com/v1beta";
+          api = "google-decisions";
+          apiKey = config.sops.placeholder."users/dan/home/omp/gemini-decisions-api-key";
+          auth = "apiKey";
+          models = [
+            {
+              id = "gemini-decision-1";
+              name = "Gemini Decision 1";
+              kind = "judge";
+              reasoning = false;
+              input = [
+                "text"
+                "image"
+              ];
+              contextWindow = 262144;
+            }
+          ];
+        };
+        my.omp.settings.modelRoles.judge = lib.mkDefault "gemini-decisions/gemini-decision-1";
+        my.omp.router.enable = true;
 
         programs.git = {
           enable = true;
@@ -90,6 +115,7 @@ in
           defaultSopsFile = self + "/secrets/users/dan.yaml";
           secrets = {
             "users/dan/home/smoke" = { };
+            "users/dan/home/omp/gemini-decisions-api-key" = { };
           };
         };
 
