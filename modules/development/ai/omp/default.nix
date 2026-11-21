@@ -351,8 +351,10 @@ _: {
         home.packages = [ sync ];
 
         # Always-apply rules (subagents included); the worktree layout and cleanup
-        # they describe come from ../../worktrees.
+        # they describe, and the global `.superpowers/` ignore, come from
+        # ../../worktrees.
         home.file.".omp/agent/rules/worktrees.md".source = ./_rules/worktrees.md;
+        home.file.".omp/agent/rules/superpowers-artifacts.md".source = ./_rules/superpowers-artifacts.md;
 
         # Invalid local inputs fail visibly before native configuration is changed.
         home.activation.ompConfig =
