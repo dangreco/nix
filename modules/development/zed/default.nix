@@ -228,9 +228,6 @@ _: {
       config = lib.mkIf (cfg.enable && osConfig.my.zed.enable) {
         xdg.configFile."zed/settings.json".text = builtins.toJSON cfg.settings;
 
-        # The upstream installer links the CLI to ~/.local/bin/zed.
-        home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
-
         # The app (incl. zed's self-updates), the desktop entry the installer
         # wrote, and zed's state dir. ~/.local/bin (the CLI symlink) is persisted for
         # everyone in storage/impermanence.
