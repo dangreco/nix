@@ -9,11 +9,11 @@ on:
     branches: [dev]
   pull_request:
   workflow_dispatch:
-  # From update-flake-lock.yml, on the lock-update branch.
+  # From update-flake-lock.yml, on the exact lock-update commit SHA.
   workflow_call:
     inputs:
       ref:
-        description: Git ref to check out and build.
+        description: Git ref or exact commit SHA to check out and build.
         type: string
         required: true
 

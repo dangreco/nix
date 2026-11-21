@@ -1,30 +1,41 @@
-# Weekly flake.lock update as a pull request into dev, then every check built on
-# the PR branch. PRs opened with GITHUB_TOKEN do not trigger other workflows, so the
-# checks run here (calling ci.yml) instead of on the PR's own events; see this
-# workflow's run for the results.
+# Nightly flake.lock PR into dev; all flake checks must pass before squash-merge.
+# GITHUB_TOKEN PRs do not trigger CI, so call ci.yml on the captured head SHA.
+# The merge uses that same SHA: a changed head must be checked in a new run.
+# No lock diff skips checks/merge; failed checks leave the PR open for the next run.
 name: Update flake.lock
 
 on:
   schedule:
-    - cron: "0 6 * * 1" # Mondays, 06:00 UTC
+    - cron: "17 6 * * *" # Nightly, 06:17 UTC; GitHub may delay scheduled runs.
   workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
 
+# Serialize scheduled/manual runs so one cannot update the PR while another tests it.
+concurrency:
+  group: update-flake-lock
+  cancel-in-progress: false
+
 jobs:
   lock:
     name: Update flake.lock
+    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     outputs:
-      pr: ${{ steps.update.outputs.pull-request-number }}
+      pr: ${{ steps.pr.outputs.number }}
+      sha: ${{ steps.pr.outputs.sha }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: dev
       - uses: cachix/install-nix-action@v31
       - id: update
         uses: DeterminateSystems/update-flake-lock@v29
         with:
+          base: dev
+          branch: update_flake_lock_action
           # Conventional commits, like the commitizen hook enforces locally.
           commit-msg: "chore(flake): update flake.lock"
           pr-title: "chore(flake): update flake.lock"
@@ -35,8 +46,30 @@ jobs:
             {{ env.GIT_COMMIT_MESSAGE }}
             ```
 
-            Every flake check (hosts, NixOS tests, hooks) is built on this branch by
-            the "Update flake.lock" workflow run that opened this PR.
+            Every flake check (hosts, NixOS tests, hooks) is built on this PR's exact
+            commit by this workflow. Once all checks pass, it is squash-merged into
+            dev automatically. Failed checks leave the PR open for investigation.
+      - name: Capture and validate update PR
+        id: pr
+        if: steps.update.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.update.outputs.pull-request-number }}
+        run: |
+          pr=$(gh pr view "$PR_NUMBER" --json number,state,headRefOid,headRefName,baseRefName,isCrossRepository,files)
+          # The action can close its PR when there is no longer a lock diff.
+          if [ "$(jq -r '.state' <<< "$pr")" != OPEN ]; then
+            exit 0
+          fi
+          jq -e '
+            .baseRefName == "dev"
+            and .headRefName == "update_flake_lock_action"
+            and .isCrossRepository == false
+            and (.files | length == 1 and .[0].path == "flake.lock")
+          ' <<< "$pr" > /dev/null
+          echo "number=$(jq -r '.number' <<< "$pr")" >> "$GITHUB_OUTPUT"
+          echo "sha=$(jq -r '.headRefOid' <<< "$pr")" >> "$GITHUB_OUTPUT"
 
   check:
     name: Checks
@@ -44,4 +77,22 @@ jobs:
     if: needs.lock.outputs.pr != ''
     uses: ./.github/workflows/ci.yml
     with:
-      ref: update_flake_lock_action
+      ref: ${{ needs.lock.outputs.sha }}
+
+  merge:
+    name: Merge checked lock update
+    needs: [lock, check]
+    if: needs.lock.outputs.pr != '' && needs.check.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ needs.lock.outputs.pr }}
+      HEAD_SHA: ${{ needs.lock.outputs.sha }}
+    steps:
+      # Deliberately merge here, not --auto: dev has no required checks, so
+      # GitHub auto-merge alone would not wait for this workflow's full matrix.
+      - name: Squash-merge the tested commit
+        run: |
+          gh pr merge "$PR_NUMBER" --squash --match-head-commit "$HEAD_SHA" \
+            --subject "chore(flake): update flake.lock"
