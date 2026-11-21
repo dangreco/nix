@@ -1,0 +1,128 @@
+# Weekly CalVer release: cut dev into a release PR to main, which hosts apply with
+# `update`. The PR merges (merge commit, so main never gains commits dev lacks) only
+# after the full flake-check matrix passes on the cut commit; the merge commit is
+# then tagged YYYY.MM.DD and a GitHub Release carries the changelog.
+# Out-of-cycle releases (e.g. hotfixes merged to dev): run this workflow manually.
+# GITHUB_TOKEN PRs do not trigger CI, so the checks run here, as in the lock update.
+# main's ruleset cannot require an up-to-date branch: its merge commits never reach
+# dev. That is safe, as merging a dev commit into main always yields dev's tree.
+name: Release
+
+on:
+  schedule:
+    - cron: "0 8 * * 0" # Sundays, 08:00 UTC; GitHub may delay scheduled runs.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  cut:
+    name: Cut release
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.cut.outputs.version }}
+      pr: ${{ steps.cut.outputs.pr }}
+      sha: ${{ steps.cut.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Open release PR
+        id: cut
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          git fetch --quiet origin main
+          if [ -z "$(git rev-list -n 1 origin/main..HEAD)" ]; then
+            echo "::notice::Nothing to release: dev has no commits beyond main."
+            exit 0
+          fi
+
+          # A newer cut supersedes any open release PR (e.g. one whose checks failed).
+          gh pr list --base main --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("release/")) | .number' |
+          while read -r stale; do
+            gh pr close "$stale" --delete-branch --comment "Superseded by a newer release cut."
+          done
+
+          version=$(date -u +%Y.%m.%d)
+          if git rev-parse -q --verify "refs/tags/$version" > /dev/null; then
+            n=1
+            while git rev-parse -q --verify "refs/tags/$version.$n" > /dev/null; do n=$((n + 1)); done
+            version=$version.$n
+          fi
+
+          previous=$(git describe --tags --abbrev=0 origin/main 2> /dev/null || git rev-parse --short origin/main)
+          {
+            echo "Changes since $previous."
+            echo
+            .github/scripts/release-notes.sh origin/main HEAD
+            echo "---"
+            echo "Merged automatically once the full flake-check matrix passes on this commit."
+          } > notes.md
+
+          git push --quiet origin "HEAD:refs/heads/release/$version"
+          url=$(gh pr create --base main --head "release/$version" --title "release: $version" --body-file notes.md)
+          {
+            echo "version=$version"
+            echo "pr=${url##*/}"
+            echo "sha=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+  check:
+    name: Checks
+    needs: cut
+    if: needs.cut.outputs.pr != ''
+    uses: ./.github/workflows/flake-checks.yml
+    with:
+      ref: ${{ needs.cut.outputs.sha }}
+      full: true
+
+  publish:
+    name: Merge and publish release
+    needs: [cut, check]
+    if: needs.cut.outputs.pr != '' && needs.check.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.cut.outputs.version }}
+      PR_NUMBER: ${{ needs.cut.outputs.pr }}
+      HEAD_SHA: ${{ needs.cut.outputs.sha }}
+    steps:
+      # main's ruleset requires this check; only this job, after the full matrix,
+      # publishes it, so the quick-tier result on the same commit cannot merge a release.
+      - name: Publish release check on the cut commit
+        run: |
+          gh api --method POST "repos/$GH_REPO/check-runs" \
+            -f name="Release / Full checks" \
+            -f head_sha="$HEAD_SHA" \
+            -f status=completed \
+            -f conclusion=success \
+            -f details_url="$GITHUB_SERVER_URL/$GH_REPO/actions/runs/$GITHUB_RUN_ID" \
+            -f 'output[title]=All flake checks passed' \
+            -f 'output[summary]=The full flake-check matrix passed for this release commit.' \
+            --silent
+      - name: Merge release PR
+        run: |
+          gh pr merge "$PR_NUMBER" --merge --match-head-commit "$HEAD_SHA" \
+            --subject "release: $VERSION"
+      - name: Tag and publish GitHub Release
+        run: |
+          merge=$(gh pr view "$PR_NUMBER" --json mergeCommit --jq .mergeCommit.oid)
+          gh pr view "$PR_NUMBER" --json body --jq .body > notes.md
+          gh release create "$VERSION" --target "$merge" --title "$VERSION" --notes-file notes.md
+          gh api --method DELETE "repos/$GH_REPO/git/refs/heads/release/$VERSION" --silent

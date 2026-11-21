@@ -6,7 +6,7 @@ usage() {
 repo_url=https://github.com/dangreco/nix.git
 push_url=git@github.com:dangreco/nix.git
 repo=""      # --repo: local tree, no GitHub
-branch=""    # --branch: default = remote HEAD
+branch=""    # --branch: default = main, the latest release
 host=""
 host_key=""
 luks_file=""
@@ -139,7 +139,7 @@ if [ "$local_mode" = 1 ]; then
   git -C "$work" add -A
   git -C "$work" commit -qm "chore: baseline"
 else
-  git clone -q ${branch:+--branch "$branch"} "$repo_url" "$work"
+  git clone -q --branch "${branch:-main}" "$repo_url" "$work"
   branch=$(git -C "$work" symbolic-ref --short HEAD)
   info "Cloned $repo_url ($branch @ $(git -C "$work" rev-parse --short HEAD))"
 fi
@@ -337,27 +337,27 @@ if [ "$local_mode" = 0 ]; then
   git -C "$work" remote set-url origin "$push_url"
   gitssh() { GIT_SSH_COMMAND="ssh -i $tmpkey -o IdentitiesOnly=yes -o IdentityAgent=none -o StrictHostKeyChecking=yes" git -C "$work" "$@"; }
   if [ "$key_ok" = 1 ] && [ "$(git -C "$work" rev-list --count "origin/$branch..HEAD")" -gt 0 ]; then
+    # dev and main are protected: host changes reach dev through a PR, and hosts
+    # get them from main with the next release.
+    side="install/$h-$(date +%Y%m%d%H%M%S)"
     for _ in 1 2 3 4 5 6; do
-      if gitssh push -q origin "HEAD:$branch"; then pushed=1; break; fi
+      if gitssh push -q origin "HEAD:refs/heads/$side"; then pushed=1; break; fi
       sleep 5   # new keys can take a few seconds to become usable
-      gitssh fetch -q origin "$branch" || continue
-      if ! git -C "$work" merge-base --is-ancestor "origin/$branch" HEAD; then
-        if ! git -C "$work" rebase -q "origin/$branch"; then
-          git -C "$work" rebase --abort
-          side="install/$h-$(date +%Y%m%d%H%M%S)"
-          if gitssh push -q origin "HEAD:refs/heads/$side"; then
-            warn "rebase onto $branch conflicted; pushed to branch $side instead"
-          fi
-          break
-        fi
-      fi
     done
-    if [ "$pushed" = 1 ]; then info "Pushed $(git -C "$work" rev-parse --short HEAD) to $branch"; fi
+    if [ "$pushed" = 1 ]; then
+      if pr=$(jq -n --arg head "$side" --arg title "${msg:-chore(hosts): update $h}" \
+            '{head: $head, base: "dev", title: $title, body: "Opened by nix-install."}' \
+          | gh_api -X POST https://api.github.com/repos/dangreco/nix/pulls -d @- | jq -er .html_url); then
+        info "Opened $pr; merge it to release $h"
+      else
+        warn "pushed $side; open a PR into dev: https://github.com/dangreco/nix/compare/dev...$side"
+      fi
+    fi
   elif [ "$key_ok" = 1 ]; then
     info "No repo changes to push"
     pushed=1
   fi
-  if [ "$pushed" = 0 ]; then warn "repo changes not pushed; after first login run: cd ~/projects/dangreco/nix && git push"; fi
+  if [ "$pushed" = 0 ]; then warn "repo changes not pushed; after first login push them to a branch and open a PR into dev"; fi
   git -C "$work" branch -q --set-upstream-to="origin/$branch"
 fi
 
@@ -374,6 +374,9 @@ rm -rf "$dest"
 cp -a "$work" "$dest"
 chown -R "$uid:$gid" "$dest"
 info "Repo checked out at ~/projects/dangreco/nix for $u"
+if [ "$new_host" = 1 ]; then
+  info "Until $h is in a release on main, apply it with: update --local"
+fi
 
 shred -u /tmp/secret.key 2>/dev/null || rm -f /tmp/secret.key
 info "Done. Remove the USB and reboot. The first boots enroll Secure Boot keys (auto-reboot); enter the LUKS passphrase each time."

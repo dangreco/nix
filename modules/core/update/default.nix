@@ -1,6 +1,6 @@
 { self, ... }:
 {
-  # `update [--pull]`: apply ~/projects/dangreco/nix to this machine. See _update.sh.
+  # `update [--local]`: apply the latest release (main), or the local checkout. See _update.sh.
   flake.modules.nixos.base =
     { pkgs, ... }:
     {
