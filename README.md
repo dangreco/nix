@@ -8,6 +8,7 @@ Personal NixOS and Home Manager configuration.
 
 ```sh
 nix develop
+nix fmt
 nix flake check
 ```
 

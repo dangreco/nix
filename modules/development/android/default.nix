@@ -6,7 +6,12 @@
 # NixOS, so the rule ships here instead.
 {
   flake.modules.nixos.base =
-    { config, lib, pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     {
       options.my.android.enable = lib.mkEnableOption "Android device development (adb/fastboot, Samsung Download mode USB access)";
 
