@@ -78,6 +78,53 @@ test("judge can select a newly declared model over a researched same-tier model"
   expect(result.model.id).toBe("new");
 });
 
+test("provider priority restricts the chosen tier to its highest-priority provider", async () => {
+  const candidates = [{ model: model("opus", { provider: "personal" }), profile: { tier: "smart" } },
+    { model: model("sol", { provider: "work" }), profile: { tier: "smart" } },
+    { model: model("other-sol", { provider: "spare" }), profile: { tier: "smart" } },
+    { model: model("fable", { provider: "personal" }), profile: { tier: "genius" } },
+    { model: model("mini", { provider: "personal" }), profile: { tier: "dumb" } }];
+  const routeTo = async (tier, providerPriority) => {
+    let pool;
+    const result = await route({ candidates, prompt: "Task", previous: "", benchmarks: {}, providerPriority,
+      judge: async (_state, question) => {
+        if (question.criteria.genius) return choice(tier, question.criteria);
+        pool = Object.values(question.criteria).map(option => JSON.parse(option).selector);
+        return choice("m0", question.criteria);
+      } });
+    return { selected: `${result.model.provider}/${result.model.id}`, pool };
+  };
+  // Only the work model competes for smart work: the judge is not even asked.
+  expect(await routeTo("smart", ["work", "personal"])).toEqual({ selected: "work/sol", pool: undefined });
+  // Capability comes first: the work provider has no genius or dumb model.
+  expect((await routeTo("genius", ["work", "personal"])).selected).toBe("personal/fable");
+  expect((await routeTo("dumb", ["work", "personal"])).selected).toBe("personal/mini");
+  // Unlisted providers rank after listed ones, equally with each other.
+  expect((await routeTo("smart", ["personal"])).selected).toBe("personal/opus");
+  expect((await routeTo("smart", ["missing"])).pool).toEqual(["personal/opus", "work/sol", "spare/other-sol"]);
+  // No priority keeps the judge's choice across every provider.
+  expect((await routeTo("smart", undefined)).pool).toEqual(["personal/opus", "work/sol", "spare/other-sol"]);
+});
+
+test("an unprofiled preferred model joins only tiers where its provider has a profiled model", async () => {
+  const candidates = [{ model: model("opus", { provider: "personal" }), profile: { tier: "smart" } },
+    { model: model("fable", { provider: "personal" }), profile: { tier: "genius" } },
+    { model: model("sol", { provider: "work" }), profile: { tier: "smart" } },
+    { model: model("new", { provider: "work" }), profile: { tier: "unclassified" } }];
+  const poolFor = async tier => {
+    let pool;
+    const result = await route({ candidates, prompt: "Task", previous: "", benchmarks: {}, providerPriority: ["work"],
+      judge: async (_state, question) => {
+        if (question.criteria.genius) return choice(tier, question.criteria);
+        pool = Object.values(question.criteria).map(option => JSON.parse(option).selector);
+        return choice("m0", question.criteria);
+      } });
+    return pool ?? [`${result.model.provider}/${result.model.id}`];
+  };
+  expect(await poolFor("smart")).toEqual(["work/sol", "work/new"]);
+  expect(await poolFor("genius")).toEqual(["personal/fable"]);
+});
+
 test("uncertain task classification rejects rather than silently choosing a cheap model", async () => {
   await expect(route({ candidates: [{ model: model("cheap"), profile: { tier: "dumb" } }],
     prompt: "Change it", previous: "", benchmarks: {}, judge: async () => ({ type: "choice", choice: "dumb",
