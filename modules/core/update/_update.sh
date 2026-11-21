@@ -1,22 +1,24 @@
 # shellcheck shell=bash
 usage() {
   cat <<'EOF'
-usage: update [--pull] [--verbose]
+usage: update [--local] [--verbose]
 
-Apply the flake in ~/projects/dangreco/nix to this machine (NixOS, including every user's Home Manager config).
+Apply the latest release (main on github:dangreco/nix) to this machine: NixOS,
+including every user's Home Manager config.
 Each step shows only the last three lines of its output; a failed step prints more.
 
-  --pull       fast-forward the checkout to the latest origin/dev first
+  --local      apply the checkout in ~/projects/dangreco/nix instead (any branch,
+               uncommitted changes included), e.g. to test dev before a release
   --verbose    print the full output of every step instead of the box
   -h, --help   show this message
 EOF
 }
 
-pull=0
+use_local=0
 verbose=0
 while [ $# -gt 0 ]; do
   case "$1" in
-    --pull) pull=1; shift ;;
+    --local) use_local=1; shift ;;
     --verbose) verbose=1; shift ;;
     -h | --help) usage; exit 0 ;;
     *) usage >&2; exit 2 ;;
@@ -24,22 +26,13 @@ while [ $# -gt 0 ]; do
 done
 
 repo=$HOME/projects/dangreco/nix
-branch=dev
+url=https://github.com/dangreco/nix.git
 tail_lines=3
 
 step() { printf '\033[1m==> %s\033[0m\n' "$*"; }
 die() { echo "update: $*" >&2; exit 1; }
 
 [ "$EUID" -ne 0 ] || die "run this as your own user, not root; sudo is used for the NixOS step"
-if [ "$pull" = 1 ] && [ ! -d "$repo/.git" ]; then
-  step "Cloning $branch into $repo"
-  mkdir -p "$(dirname "$repo")"
-  git clone -b "$branch" --quiet https://github.com/dangreco/nix.git "$repo" \
-    || die "could not clone https://github.com/dangreco/nix.git"
-fi
-
-[ -f "$repo/flake.nix" ] || die "no flake at $repo"
-git -C "$repo" rev-parse --git-dir >/dev/null 2>&1 || die "$repo is not a git checkout"
 
 host=$(uname -n)
 user=$(id -un)
@@ -102,32 +95,25 @@ run_boxed() {
   fi
 }
 
-# ---------------------------------------------------------------- pull
-if [ "$pull" = 1 ]; then
-  step "Pulling $branch into $repo"
-  current=$(git -C "$repo" symbolic-ref --short -q HEAD || true)
-  [ "$current" = "$branch" ] \
-    || die "$repo is on '${current:-a detached HEAD}', not $branch; run: git -C $repo switch $branch"
-
-  git -C "$repo" fetch --quiet https://github.com/dangreco/nix.git "$branch" \
-    || die "could not fetch https://github.com/dangreco/nix.git (network down?)"
-
-  before=$(git -C "$repo" rev-parse --short HEAD)
-  # Fast-forward only: never create a merge commit or touch local commits.
-  git -C "$repo" merge --ff-only --quiet FETCH_HEAD \
-    || die "cannot fast-forward $branch to remote; resolve it in $repo"
-  after=$(git -C "$repo" rev-parse --short HEAD)
-
-  if [ "$before" = "$after" ]; then
-    echo "already up to date at $after"
-  else
-    echo "$before -> $after"
-    git -C "$repo" log --oneline --no-decorate "$before..$after"
-  fi
-fi
 # Home Manager is part of the NixOS configuration, so this one step updates every
 # user's home too.
 [ "$user" = "dan" ] || die "user '$user' is not a main user; ask dan to run update (it covers every user's Home Manager config)"
+
+# ---------------------------------------------------------------- source
+if [ "$use_local" = 1 ]; then
+  [ -f "$repo/flake.nix" ] || die "no flake at $repo"
+  flake=$repo
+  step "Applying local checkout $repo ($(git -C "$repo" describe --always --dirty 2>/dev/null || echo 'not a git checkout'))"
+else
+  # Resolve main once and build that exact commit; its release tag names it.
+  refs=$(git ls-remote "$url" refs/heads/main 'refs/tags/*') \
+    || die "could not reach $url (network down?)"
+  rev=$(awk '$2 == "refs/heads/main" { print $1 }' <<<"$refs")
+  [ -n "$rev" ] || die "no main branch at $url"
+  version=$(awk -v r="$rev" '$1 == r && $2 ~ /^refs\/tags\// { t = $2; sub(/^refs\/tags\//, "", t); sub(/\^\{\}$/, "", t); print t }' <<<"$refs" | tail -n 1)
+  flake=github:dangreco/nix/$rev
+  step "Applying release ${version:-untagged} (main @ ${rev:0:7})"
+fi
 
 # ---------------------------------------------------------------- sudo
 # The boxed steps run in the background with no terminal input, so a password prompt
@@ -138,4 +124,4 @@ fi
 
 # ---------------------------------------------------------------- NixOS
 # Not allowed to rewrite flake.lock: running as root, it would leave a root-owned file in the checkout.
-run_boxed "NixOS ($host)" sudo nixos-rebuild switch --flake "$repo#$host" --no-write-lock-file
+run_boxed "NixOS ($host)" sudo nixos-rebuild switch --flake "$flake#$host" --no-write-lock-file
