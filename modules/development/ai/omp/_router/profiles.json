@@ -1,0 +1,2160 @@
+{
+  "researchedAt": "2026-11-21",
+  "policy": "Tiers are operator policy, not measured equivalence. Published API benchmarks are not measurements of this proxy. Live models.yml/registry constraints override published capabilities. Scores with different benchmark versions, harnesses, effort or dates are not directly comparable. Missing scores are unknown, not zero. API list prices do not represent subscription quota cost.",
+  "models": {
+    "claude-fable-5": {
+      "capabilities": "1M context, 128K max output, text+image in, adaptive thinking always on, default effort high, $10/$50 per MTok. Anthropic positions as most capable generally available model (Fable 5 launch).",
+      "identityNote": "Anthropic API id. Overview page header says Legacy (successor claude-fable-5-2); deprecation table lists Active, retirement not sooner than 2027-06-09. Benchmark numbers below are the Fable 5 row of the Fable 5.1 comparison table; Anthropic footnote says Fable 5 scored zero on OSWorld 2.0 and AutomationBench where safeguards intervened, which depresses those two scores.",
+      "sources": [
+        "https://www.anthropic.com/news/claude-fable-5-mythos-5",
+        "https://platform.claude.com/docs/en/models/fable-5/overview",
+        "https://www.anthropic.com/claude-fable-and-mythos-5-1",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Terminal-Bench-Science 0.1",
+          "score": 24.7,
+          "unit": "% accuracy",
+          "setup": "Anthropic-run, Fable 5.1 comparison table, Fable 5 row, production safeguards on",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 42.0,
+          "unit": "% accuracy",
+          "setup": "Anthropic-run comparison table, Fable 5 row",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "GDPval-AA v2",
+          "score": 1723,
+          "unit": "Elo",
+          "setup": "Anthropic comparison table, Fable 5 row; labeled v2 here, v2.1 in later tables",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "OSWorld 2.0",
+          "score": 36.1,
+          "unit": "% strict",
+          "setup": "Anthropic comparison table, Fable 5 row; partial 72.9%; zeroed on safeguard-intervened tasks",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 57.8,
+          "unit": "% no tools",
+          "setup": "Anthropic comparison table; with tools 63.8%",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "AutomationBench",
+          "score": 17.1,
+          "unit": "%",
+          "setup": "Anthropic comparison table, Fable 5 row; zeroed on safeguard-intervened tasks",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "CursorBench 3.2.0",
+          "score": 70.5,
+          "unit": "%",
+          "setup": "Anthropic comparison table, Fable 5 row",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        }
+      ],
+      "tier": "genius"
+    },
+    "claude-fable-5-1": {
+      "capabilities": "Same spec as Fable 5: 1M context, 128K output, adaptive thinking always on, default effort high. $10/$50 base; cache reads $0.25. Anthropic states Fable 5.1 is cheaper on cache reads and improves over Fable 5 at Low/Medium effort at lower cost.",
+      "identityNote": "Anthropic API id. Overview page says Legacy; claude-fable-5-2 (released 2026-11-09) is current, $8/$40. Benchmarks are from the Anthropic comparison table with production safeguards enabled, which Anthropic says depresses OSWorld 2.0 and AutomationBench.",
+      "sources": [
+        "https://www.anthropic.com/claude-fable-and-mythos-5-1",
+        "https://platform.claude.com/docs/en/models/fable-5-1/overview",
+        "https://platform.claude.com/docs/en/models/fable-5-2/overview",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Terminal-Bench-Science 0.1",
+          "score": 52.6,
+          "unit": "% accuracy",
+          "setup": "Anthropic comparison table, Fable 5.1 column, safeguards on",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 55.8,
+          "unit": "% accuracy",
+          "setup": "Anthropic table; Mythos 5.1 same model with fewer safeguards reports 60.9%, not used here",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "GDPval-AA v2",
+          "score": 1853,
+          "unit": "Elo",
+          "setup": "Anthropic table, labeled v2",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "OSWorld 2.0",
+          "score": 41.7,
+          "unit": "% strict",
+          "setup": "Anthropic table; partial 77.9%; zeroed on safeguard-intervened tasks",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 60.9,
+          "unit": "% no tools",
+          "setup": "Anthropic table; with tools 65.0%",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "AutomationBench",
+          "score": 31.4,
+          "unit": "%",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        },
+        {
+          "benchmark": "CursorBench 3.2.0",
+          "score": 73.4,
+          "unit": "%",
+          "setup": "Anthropic table; the Fable 5.1 announcement quote also cites 73.4% at max effort",
+          "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+        }
+      ],
+      "tier": "genius"
+    },
+    "claude-opus-5-5": {
+      "capabilities": "1M context, 128K max output, adaptive thinking always on, default effort medium, $4/$20 per MTok, knowledge cutoff Jun 2026. Anthropic positions it as close to Fable 5.1 at lower cost for long-running agentic coding and knowledge work. Vision and computer use supported.",
+      "identityNote": "Anthropic API id, released 2026-09-22, Active, retirement not sooner than 2027-09-22. Anthropic's Table 8.1.A uses max effort, 5-trial average, Terminal-Bench 4.0 at xhigh. The Artificial Analysis run of Terminal-Bench 4.0 scored 59.6%, not 66.4%. Not the Antigravity variant.",
+      "sources": [
+        "https://platform.claude.com/docs/en/models/opus-5-5/overview.md",
+        "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf",
+        "https://www.anthropic.com/claude-sonnet-5-5",
+        "https://artificialanalysis.ai/articles/claude-opus-5-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "SWE-bench Pro",
+          "score": 89.9,
+          "unit": "% (table has no unit)",
+          "setup": "Opus 5.5 system card Table 8.1.A, max effort, 5 trials",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "SWE-bench Multilingual",
+          "score": 93.9,
+          "unit": "% (table has no unit)",
+          "setup": "Opus 5.5 system card Table 8.1.A",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 66.4,
+          "unit": "% accuracy",
+          "setup": "Anthropic run at xhigh effort; Artificial Analysis run reports 59.6%",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0 (Artificial Analysis run)",
+          "score": 59.6,
+          "unit": "% accuracy",
+          "setup": "Independent AA run at max effort, Intelligence Index setup",
+          "source": "https://artificialanalysis.ai/articles/claude-opus-5-5"
+        },
+        {
+          "benchmark": "FrontierCode 1.1 (Main)",
+          "score": 54.4,
+          "unit": "% accuracy",
+          "setup": "Anthropic system card, max effort",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "CursorBench 4.0",
+          "score": 57.8,
+          "unit": "%",
+          "setup": "Anthropic Sonnet 5.5 announcement comparison table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "Terminal-Bench-Science 0.1",
+          "score": 58.7,
+          "unit": "% accuracy",
+          "setup": "Anthropic system card, max effort",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 64.4,
+          "unit": "% no tools",
+          "setup": "Anthropic system card; with tools 67.7%",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "OSWorld 2.0",
+          "score": 48.7,
+          "unit": "% strict",
+          "setup": "Anthropic system card; partial 81.8. Sonnet 5.5 page labels the 81.8 partial score OSWorld 2.1",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "HealthBench Professional",
+          "score": 65.6,
+          "unit": "%",
+          "setup": "Anthropic system card",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "GDPval-AA v2.1",
+          "score": 1846,
+          "unit": "Elo",
+          "setup": "Anthropic system card; AA reports 1846 too",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "AA-Briefcase v1.1",
+          "score": 1822,
+          "unit": "Elo",
+          "setup": "Anthropic system card; AA reports 1822",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "AutomationBench",
+          "score": 40.0,
+          "unit": "%",
+          "setup": "Anthropic system card",
+          "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+        },
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5",
+          "score": 58,
+          "unit": "index points",
+          "setup": "Independent AA run, max effort, default fallback enabled",
+          "source": "https://artificialanalysis.ai/articles/claude-opus-5-5"
+        }
+      ],
+      "tier": "smart"
+    },
+    "claude-opus-5": {
+      "capabilities": "1M context, adaptive thinking, max effort in Anthropic's standard config. Anthropic describes near-Fable-5 intelligence at half the price, with strong agentic coding, computer use, and knowledge work. Pricing $5/$25 (AA reports this).",
+      "identityNote": "Anthropic API id, released 2026-07-24, Active, retirement not sooner than 2027-07-24. Scores below come from Opus 5's own system card Table 8.1.A. The Opus 5.5 card lists different Opus 5 values for some rows (e.g. FrontierCode 48.0 vs 53.4, GDPval-AA 1708 vs 1861), so setup or version differs; both are kept, not merged.",
+      "sources": [
+        "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf",
+        "https://www.anthropic.com/news/claude-opus-5",
+        "https://artificialanalysis.ai/articles/claude-opus-5-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "SWE-bench Verified",
+          "score": 96.0,
+          "unit": "%",
+          "setup": "Opus 5 system card, 5-trial average",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "SWE-bench Pro",
+          "score": 79.2,
+          "unit": "%",
+          "setup": "Opus 5 system card Table 8.1",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "SWE-bench Multilingual",
+          "score": 89.5,
+          "unit": "%",
+          "setup": "Opus 5 system card Table 8.1",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 68.8,
+          "unit": "%",
+          "setup": "Opus 5 system card Table 8.1",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "FrontierCode 1.1 (Main)",
+          "score": 53.4,
+          "unit": "%",
+          "setup": "Opus 5 system card; Opus 5.5 card lists 48.0 for Opus 5",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 56.3,
+          "unit": "% no tools",
+          "setup": "Opus 5 system card; with tools 64.7",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "OSWorld 2.0",
+          "score": 70.6,
+          "unit": "%",
+          "setup": "Opus 5 system card Table 8.1 (partial/strict not split in this table)",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "GDPval-AA v2",
+          "score": 1861,
+          "unit": "Elo",
+          "setup": "Opus 5 system card; Opus 5.5 card lists 1708 for Opus 5",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "AA-Briefcase",
+          "score": 1720,
+          "unit": "Elo",
+          "setup": "Opus 5 system card; Opus 5.5 card lists 1673",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        },
+        {
+          "benchmark": "AutomationBench",
+          "score": 26.0,
+          "unit": "%",
+          "setup": "Opus 5 system card; Opus 5.5 card lists 26.9",
+          "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+        }
+      ],
+      "tier": "smart"
+    },
+    "claude-opus-4-8": {
+      "capabilities": "1M context, 128K output, default effort high with xhigh and max. $5/$25. Anthropic describes a modest but real improvement over Opus 4.7, with computer-use gains (Online-Mind2Web 84% per a customer quote), and an honesty improvement.",
+      "identityNote": "Anthropic API id, released 2026-05-28, Active, retirement not sooner than 2027-05-28. Anthropic's announcement table is an image, so SWE-bench Verified and Terminal-Bench 2.1 come from third-party pages that cite the system card. GDPval-AA 1890 is an earlier GDPval-AA version, not comparable to v2.1 scores.",
+      "sources": [
+        "https://www.anthropic.com/news/claude-opus-4-8",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+        "https://leaderboard.steel.dev/leaderboards/swe-bench-verified",
+        "https://llm-stats.com/blog/research/claude-opus-4-8-launch",
+        "https://artificialanalysis.ai/articles/claude-opus-4-8-analysis-and-benchmarks"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "SWE-bench Verified",
+          "score": 88.6,
+          "unit": "%",
+          "setup": "Self-reported in Opus 4.8 system card, cited by Steel leaderboard; not verified against the system card here",
+          "source": "https://leaderboard.steel.dev/leaderboards/swe-bench-verified"
+        },
+        {
+          "benchmark": "Terminal-Bench 2.1",
+          "score": 74.6,
+          "unit": "%",
+          "setup": "Terminus-2 public harness per Anthropic footnote; secondary source llm-stats",
+          "source": "https://llm-stats.com/blog/research/claude-opus-4-8-launch"
+        },
+        {
+          "benchmark": "GDPval-AA",
+          "score": 1890,
+          "unit": "Elo",
+          "setup": "Earlier GDPval-AA version (not v2.1); secondary source llm-stats",
+          "source": "https://llm-stats.com/blog/research/claude-opus-4-8-launch"
+        },
+        {
+          "benchmark": "OSWorld-Verified",
+          "score": 82.3,
+          "unit": "%",
+          "setup": "Anthropic footnote, re-scored under updated method",
+          "source": "https://www.anthropic.com/news/claude-opus-4-8"
+        }
+      ],
+      "tier": "smart"
+    },
+    "claude-opus-4-7": {
+      "capabilities": "1M context, $5/$25. Anthropic describes better vision (images up to 2,576 px long edge), better instruction following, and file-system memory. Added the xhigh effort level.",
+      "identityNote": "Anthropic API id, released 2026-04-16, Active, retirement not sooner than 2027-04-16. The Anthropic chart is an image. Only customer-reported and footnoted numbers are extractable here, so most benchmark slots are empty.",
+      "sources": [
+        "https://www.anthropic.com/news/claude-opus-4-7",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+        "https://www-cdn.anthropic.com/037f06850df7fbe871e206dad004c3db5fd50340/Claude%20Opus%204.7%20System%20Card.pdf"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "CursorBench",
+          "score": 70,
+          "unit": "%",
+          "setup": "Cursor CEO quote in Anthropic announcement; version unspecified; Opus 4.6 scored 58%",
+          "source": "https://www.anthropic.com/news/claude-opus-4-7"
+        }
+      ],
+      "tier": "smart"
+    },
+    "claude-opus-4-6": {
+      "capabilities": "1M context in beta, $5/$25. Adaptive thinking and four effort levels (low/medium/high/max). Anthropic reports top Terminal-Bench 2.0 and HLE at launch, and strong long-context retrieval.",
+      "identityNote": "Anthropic API id, released 2026-02-05, Active, retirement not sooner than 2027-02-05. Launch table is an image. Most absolute scores are unavailable in text; relative Elo gains are stated by Anthropic. Antigravity removed its Claude Opus 4.6 model on 2026-11-18 (third-party report, not verified).",
+      "sources": [
+        "https://www.anthropic.com/news/claude-opus-4-6",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+        "https://binaryverseai.com/claude-opus-4-6-benchmarks-agentic-independent/"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "MRCR v2 (8-needle, 1M)",
+          "score": 76,
+          "unit": "%",
+          "setup": "Anthropic text; Sonnet 4.5 scored 18.5% in the same setup",
+          "source": "https://www.anthropic.com/news/claude-opus-4-6"
+        },
+        {
+          "benchmark": "Terminal-Bench 2.0",
+          "score": 65.4,
+          "unit": "%",
+          "setup": "Secondary source binaryverseai, not verified against Anthropic's system card",
+          "source": "https://binaryverseai.com/claude-opus-4-6-benchmarks-agentic-independent/"
+        }
+      ],
+      "tier": "smart"
+    },
+    "claude-opus-4-5-20251101": {
+      "capabilities": "$5/$25. Anthropic positions as strong for coding, agents and computer use, with an effort parameter (medium matches Sonnet 4.5 best SWE-bench Verified with 76% fewer output tokens).",
+      "identityNote": "Anthropic API id, released 2025-11-24, Active, but retirement not sooner than 2026-11-24, three days from this research date. Treat as lower-smart and a retirement risk. Absolute scores come from the Azure blog citing Anthropic and the Anthropic text; the rest are relative claims.",
+      "sources": [
+        "https://www.anthropic.com/news/claude-opus-4-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+        "https://azure.microsoft.com/en-us/blog/introducing-claude-opus-4-5-in-microsoft-foundry"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "SWE-bench Verified",
+          "score": 80.9,
+          "unit": "%",
+          "setup": "Stated by Microsoft Azure blog citing Anthropic; Anthropic chart is an image",
+          "source": "https://azure.microsoft.com/en-us/blog/introducing-claude-opus-4-5-in-microsoft-foundry"
+        }
+      ],
+      "tier": "smart"
+    },
+    "claude-sonnet-5-5": {
+      "capabilities": "1M context, 128K output, adaptive thinking, default effort high on API and medium in apps, $2/$10 per MTok, cache reads $0.10. Anthropic positions it for well-scoped everyday coding, documents, and slides, with 30%+ speed gain over Sonnet 5.",
+      "identityNote": "Anthropic API id, released 2026-09-28, Active, retirement not sooner than 2027-09-28. Scores are from the Anthropic Sonnet 5.5 comparison table; the FrontierCode row lists two effort levels. Anthropic says Opus 5.5 remains stronger on complex open-ended work.",
+      "sources": [
+        "https://www.anthropic.com/claude-sonnet-5-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+        "https://www.anthropic.com/claude-haiku-5-5"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 70.6,
+          "unit": "%",
+          "setup": "Anthropic comparison table; Opus 5.5 scores 66.4% in the same table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "FrontierCode 1.1 (Main), Max",
+          "score": 46.2,
+          "unit": "%",
+          "setup": "Anthropic table, max effort",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "FrontierCode 1.1 (Main), Xhigh",
+          "score": 52.1,
+          "unit": "%",
+          "setup": "Anthropic table, xhigh effort",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "CursorBench 4.0",
+          "score": 55.5,
+          "unit": "%",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "GDPval-AA v2.1",
+          "score": 1844,
+          "unit": "Elo",
+          "setup": "Anthropic table; Haiku 5.5 table lists 1840",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "AA-Briefcase v1.1",
+          "score": 1811,
+          "unit": "Elo",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 64.5,
+          "unit": "% with tools",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "OSWorld 2.1",
+          "score": 80.1,
+          "unit": "% partial",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "Chartography",
+          "score": 61.6,
+          "unit": "% no tools",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        }
+      ],
+      "tier": "average"
+    },
+    "claude-sonnet-5": {
+      "capabilities": "1M context, adaptive thinking, $2/$10 (introductory price made permanent 2026-08-10), upgrade over Sonnet 4.6. Anthropic says it is close to Opus 4.8 at lower price, with cyber safeguards on by default.",
+      "identityNote": "Anthropic API id, released 2026-06-30, Active, retirement not sooner than 2027-06-30. The Sonnet 5 announcement table is an image; the numbers below come from the Sonnet 5 column of the Sonnet 5.5 comparison table, a later Anthropic run.",
+      "sources": [
+        "https://www.anthropic.com/news/claude-sonnet-5",
+        "https://www.anthropic.com/claude-sonnet-5-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 10.3,
+          "unit": "%",
+          "setup": "Anthropic Sonnet 5.5 comparison table, Sonnet 5 column",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "FrontierCode 1.1 (Main)",
+          "score": 42.4,
+          "unit": "%",
+          "setup": "Anthropic Sonnet 5.5 table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "CursorBench 4.0",
+          "score": 34.1,
+          "unit": "%",
+          "setup": "Anthropic Sonnet 5.5 table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "GDPval-AA v2.1",
+          "score": 1449,
+          "unit": "Elo",
+          "setup": "Anthropic Sonnet 5.5 table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "AA-Briefcase v1.1",
+          "score": 1359,
+          "unit": "Elo",
+          "setup": "Anthropic Sonnet 5.5 table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 54.9,
+          "unit": "% with tools",
+          "setup": "Anthropic Sonnet 5.5 table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "OSWorld 2.1",
+          "score": 57.0,
+          "unit": "% partial",
+          "setup": "Anthropic Sonnet 5.5 table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        },
+        {
+          "benchmark": "Chartography",
+          "score": 15.6,
+          "unit": "% no tools",
+          "setup": "Anthropic Sonnet 5.5 table",
+          "source": "https://www.anthropic.com/claude-sonnet-5-5"
+        }
+      ],
+      "tier": "average"
+    },
+    "claude-sonnet-4-6": {
+      "capabilities": "1M context in beta, adaptive and extended thinking, context compaction (beta), $3/$15 at launch. Anthropic describes Opus-level performance at Sonnet price on many tasks, strong computer use and OSWorld gains.",
+      "identityNote": "Anthropic API id, released 2026-02-17, Active, retirement not sooner than 2027-02-17. Two Anthropic-updated scores differ from launch values (OSWorld-Verified, HLE). The headline SWE-bench Verified value is in an image; 80.2% is only the prompt-modified variant from a footnote.",
+      "sources": [
+        "https://www.anthropic.com/news/claude-sonnet-4-6",
+        "https://www.anthropic.com/news/claude-sonnet-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "OSWorld-Verified",
+          "score": 78.5,
+          "unit": "%",
+          "setup": "Updated by Anthropic in Sonnet 5 announcement; launch value differs",
+          "source": "https://www.anthropic.com/news/claude-sonnet-5"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 34.6,
+          "unit": "% no tools",
+          "setup": "Updated grader; with tools 46.8%; launch value differs",
+          "source": "https://www.anthropic.com/news/claude-sonnet-5"
+        },
+        {
+          "benchmark": "SWE-bench Verified (prompt-modified)",
+          "score": 80.2,
+          "unit": "%",
+          "setup": "Footnote variant with prompt modification; base score not in text",
+          "source": "https://www.anthropic.com/news/claude-sonnet-4-6"
+        }
+      ],
+      "tier": "average"
+    },
+    "claude-haiku-5-5": {
+      "capabilities": "1M context, 128K output, adaptive thinking with effort (default medium), fastest model in the 5.5 family. $0.10/$0.50 up to 100k prompt tokens, $0.50/$2.50 above. Recommended for classification, extraction, summaries, compaction, subagents, and browser use.",
+      "identityNote": "Anthropic API id, released 2026-10-07, Active, retirement not sooner than 2027-10-07. Anthropic itself positions it below Sonnet/Opus for complex agentic coding (Terminal-Bench 4.0 39.2%). Artificial Analysis Intelligence Index 43.",
+      "sources": [
+        "https://www.anthropic.com/claude-haiku-5-5",
+        "https://platform.claude.com/docs/en/models/haiku-5-5/overview",
+        "https://artificialanalysis.ai/articles/claude-haiku-5-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index",
+          "score": 43,
+          "unit": "index points",
+          "setup": "Independent AA run, per AA article",
+          "source": "https://artificialanalysis.ai/articles/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "GDPval-AA v2.1",
+          "score": 1620,
+          "unit": "Elo",
+          "setup": "Anthropic Haiku 5.5 table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "AA-Briefcase v1.1",
+          "score": 1578,
+          "unit": "Elo",
+          "setup": "Anthropic Haiku 5.5 table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "OSWorld 2.1 (offline subset)",
+          "score": 72.4,
+          "unit": "% partial",
+          "setup": "Anthropic Haiku 5.5 table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 45.9,
+          "unit": "% no tools",
+          "setup": "Anthropic table; with tools 57.4%",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 39.2,
+          "unit": "%",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "FrontierCode 1.1 (Main)",
+          "score": 46.4,
+          "unit": "%",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "Chartography",
+          "score": 46.4,
+          "unit": "% no tools",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        }
+      ],
+      "tier": "dumb"
+    },
+    "claude-haiku-4-5-20251001": {
+      "capabilities": "200K context, 64K max output, legacy budget-token thinking, $1/$5 per Anthropic's Haiku 5.5 comparison. Anthropic positions as the predecessor of Haiku 5.5, about 75% more expensive per task.",
+      "identityNote": "Anthropic API id. Active, retirement not sooner than 2026-10-15 per deprecation table. Scores below are Anthropic re-runs shown in the Haiku 5.5 comparison, not the Haiku 4.5 launch values. The Terminal-Bench 4.0 0.0% is a re-run result under the TB 4.0 harness.",
+      "sources": [
+        "https://www.anthropic.com/claude-haiku-5-5",
+        "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "GDPval-AA v2.1",
+          "score": 735,
+          "unit": "Elo",
+          "setup": "Anthropic Haiku 5.5 comparison table, Haiku 4.5 column",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "AA-Briefcase v1.1",
+          "score": 614,
+          "unit": "Elo",
+          "setup": "Anthropic Haiku 5.5 table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "OSWorld 2.1 (offline subset)",
+          "score": 15.7,
+          "unit": "% partial",
+          "setup": "Anthropic Haiku 5.5 table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 10.2,
+          "unit": "% no tools",
+          "setup": "Anthropic table; with tools 18.7%",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 0.0,
+          "unit": "%",
+          "setup": "Anthropic re-run under TB 4.0",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        },
+        {
+          "benchmark": "Chartography",
+          "score": 6.4,
+          "unit": "% no tools",
+          "setup": "Anthropic table",
+          "source": "https://www.anthropic.com/claude-haiku-5-5"
+        }
+      ],
+      "tier": "dumb"
+    },
+    "claude-opus-5-5-high": {
+      "capabilities": "Google Antigravity 'Claude Opus 5.5 (thinking)' at High level. Google docs: 1M context; four levels low/medium/high/max; pay-as-you-go via administrator-enabled partner models. Local config: 'budget' effort mode (low/medium/high), 1M context, 64K max output.",
+      "identityNote": "PROXY ANTIGRAVITY VARIANT. Google's documented id format is claude-opus-5-5-<level>; the High level is claude-opus-5-5-high. The 'budget' token-budget mode and 64K output cap come from the local llm.nix comment and are not in Google's public docs. No benchmark is measured on this variant. Base Opus 5.5 scores above do not transfer.",
+      "sources": [
+        "https://antigravity.google/docs/enterprise",
+        "https://cloud.google.com/blog/products/ai-machine-learning/claude-opus-55-and-claude-sonnet-55-available-in-antigravity",
+        "modules/development/ai/omp/llm.nix:95-263"
+      ],
+      "benchmarks": [],
+      "tier": "smart"
+    },
+    "claude-sonnet-5-5-high": {
+      "capabilities": "Google Antigravity 'Claude Sonnet 5.5 (thinking)' at High level. Google docs: four levels low/medium/high/max. Local config: 'budget' effort mode (low/medium/high), 1M context, 64K max output.",
+      "identityNote": "PROXY ANTIGRAVITY VARIANT. Google's id format is claude-sonnet-5-5-<level>; High is claude-sonnet-5-5-high. Budget mode and 64K cap are local config assumptions, not Google-documented. No benchmark is measured on this variant. Base Sonnet 5.5 scores above do not transfer.",
+      "sources": [
+        "https://antigravity.google/docs/enterprise",
+        "https://cloud.google.com/blog/products/ai-machine-learning/claude-opus-55-and-claude-sonnet-55-available-in-antigravity",
+        "modules/development/ai/omp/llm.nix:95-263"
+      ],
+      "benchmarks": [],
+      "tier": "average"
+    },
+    "gpt-6.2-astra": {
+      "capabilities": "Text and image input, text output, reasoning (none rejected; low-xhigh-max), Responses and Chat Completions, tool calling via Responses, 1,050,000 context and 128,000 max output in API docs. Codex catalog lists 272,000 context.",
+      "identityNote": "Documented upstream id gpt-6.2-astra (OpenAI API model page). Released 2026-11-17. Not a proxy alias.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-6.2-astra",
+        "https://openai.com/index/introducing-gpt-6-2-astra-sol/",
+        "https://developers.openai.com/api/docs/changelog",
+        "https://raw.githubusercontent.com/openai/codex/main/codex-rs/models-manager/models.json"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 62,
+          "unit": "index points",
+          "setup": "max effort, via OpenAI API (AA reports low 46, medium 57, high 60, xhigh 62)",
+          "source": "https://artificialanalysis.ai/models/gpt-6-2-astra"
+        },
+        {
+          "benchmark": "AA-3D Elo",
+          "score": 1318,
+          "unit": "Elo",
+          "setup": "human-judged interactive 3D experiences, AA reported",
+          "source": "https://artificialanalysis.ai/articles/openai-has-the-2-model-in-the-intelligence-index-with-the-release-of-gpt-6-2-astra-and-gpt-6-2-sol"
+        },
+        {
+          "benchmark": "AA-Robotics v0.1",
+          "score": 79,
+          "unit": "score",
+          "setup": "AA research preview, as reported by AA",
+          "source": "https://artificialanalysis.ai/articles/openai-has-the-2-model-in-the-intelligence-index-with-the-release-of-gpt-6-2-astra-and-gpt-6-2-sol"
+        }
+      ],
+      "tier": "genius",
+      "tierEvidence": "AA Index 62 max, #2 overall on AA at launch behind Claude Fable 5.2. OpenAI calls it its hardest-task model.",
+      "tierUncertainty": "Claude Fable 5.2 vs Fable-equivalent mapping is a policy choice; the AA Index version and Claude scores are not compared here."
+    },
+    "gpt-6.2-sol": {
+      "capabilities": "Text and image input, text output, reasoning (none rejected), Responses and Chat Completions, 1,050,000 context API; Codex catalog 500,000 context.",
+      "identityNote": "Documented upstream id gpt-6.2-sol. Pricing unchanged from GPT-6.1 Sol.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-6.2-sol",
+        "https://openai.com/index/introducing-gpt-6-2-astra-sol/",
+        "https://artificialanalysis.ai/models/gpt-6-2-sol"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 57,
+          "unit": "index points",
+          "setup": "max effort via OpenAI API",
+          "source": "https://artificialanalysis.ai/models/gpt-6-2-sol"
+        },
+        {
+          "benchmark": "AA-3D Elo",
+          "score": 1259,
+          "unit": "Elo",
+          "setup": "AA reported",
+          "source": "https://artificialanalysis.ai/articles/openai-has-the-2-model-in-the-intelligence-index-with-the-release-of-gpt-6-2-astra-and-gpt-6-2-sol"
+        },
+        {
+          "benchmark": "AA-Robotics v0.1",
+          "score": 78,
+          "unit": "score",
+          "setup": "AA research preview",
+          "source": "https://artificialanalysis.ai/articles/openai-has-the-2-model-in-the-intelligence-index-with-the-release-of-gpt-6-2-astra-and-gpt-6-2-sol"
+        }
+      ],
+      "tier": "smart",
+      "tierEvidence": "AA Index 57 at $2/$10, ~15% of Astra cost per task per OpenAI and AA. Named as the everyday default model.",
+      "tierUncertainty": "AA reports a 3-point Coding Agent Index drop vs GPT-6.1 Sol, so coding-heavy work may sit lower than the index suggests."
+    },
+    "gpt-6.1-sol": {
+      "capabilities": "Text and image input, text output, reasoning (none rejected; low, medium default, high, xhigh, max), Responses and Chat Completions, 1,050,000 API context; Codex catalog 500,000. Local catalog lists 272,000.",
+      "identityNote": "Documented upstream id gpt-6.1-sol. AA marks it deprecated in favor of GPT-6.2 Sol; the OpenAI API page does not show a shutdown date.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+        "https://openai.com/index/introducing-gpt-6-1-sol/",
+        "https://artificialanalysis.ai/models/gpt-6-1-sol"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 55,
+          "unit": "index points",
+          "setup": "max effort, deprecated on AA",
+          "source": "https://artificialanalysis.ai/models/gpt-6-1-sol"
+        }
+      ],
+      "tier": "smart",
+      "tierEvidence": "AA Index 55; OpenAI positions it as near-Astra at one-fifth the price.",
+      "tierUncertainty": "Deprecated per AA. OpenAI's own GPT-6.2 announcement supersedes it, so a migration to gpt-6.2-sol is likely."
+    },
+    "gpt-6.1-terra": {
+      "capabilities": "Text and image input, text output (no audio or video), reasoning (none, low, medium default, high, xhigh, max), Responses and Chat Completions, tool calling via Responses, 1,050,000 API context; Codex catalog 500,000.",
+      "identityNote": "Documented upstream id gpt-6.1-terra, released 2026-10-26 per OpenAI changelog. Replaces GPT-5.6 Terra.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-6.1-terra",
+        "https://openai.com/index/introducing-gpt-6-1-terra",
+        "https://artificialanalysis.ai/models/gpt-6-1-terra",
+        "https://developers.openai.com/api/docs/changelog"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 51,
+          "unit": "index points",
+          "setup": "max effort",
+          "source": "https://artificialanalysis.ai/models/gpt-6-1-terra"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 50.3,
+          "unit": "percent",
+          "setup": "max reasoning effort, OpenAI reported; compares GPT-5.6 Terra at 21.5 as published",
+          "source": "https://openai.com/index/introducing-gpt-6-1-terra"
+        }
+      ],
+      "tier": "average",
+      "tierEvidence": "AA Index 51; $1/$5 API price, 50% below GPT-5.6 Terra and GPT-6.1 Sol. OpenAI describes it for visual, computer-use and writing tasks.",
+      "tierUncertainty": "OpenAI says GPT-6.1 Sol and GPT-6 Astra stay better for the most complex coding. Terra's coding and computer-use claims are self-reported."
+    },
+    "gpt-6-astra": {
+      "capabilities": "Text and image input, text output, reasoning (none rejected), Responses and Chat Completions, computer use, 1,050,000 API context; Codex catalog 272,000.",
+      "identityNote": "Documented upstream id gpt-6-astra (released Sep 2026). AA marks it deprecated in favor of GPT-6.2 Astra.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-6-astra",
+        "https://openai.com/index/gpt-6-astra/",
+        "https://artificialanalysis.ai/models/gpt-6-astra"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 57,
+          "unit": "index points",
+          "setup": "max effort, deprecated on AA",
+          "source": "https://artificialanalysis.ai/models/gpt-6-astra"
+        },
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v4.1.1",
+          "score": 61.2,
+          "unit": "index points",
+          "setup": "OpenAI-reported table; different AA version, not comparable to v5.0.1",
+          "source": "https://openai.com/index/gpt-6-astra/"
+        },
+        {
+          "benchmark": "ExploitBench",
+          "score": 100.0,
+          "unit": "percent",
+          "setup": "no production safeguards, OpenAI reported",
+          "source": "https://openai.com/index/gpt-6-astra/"
+        },
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 74.1,
+          "unit": "percent",
+          "setup": "OpenAI reported",
+          "source": "https://openai.com/index/gpt-6-astra/"
+        },
+        {
+          "benchmark": "OSWorld 2.0 offline (partial)",
+          "score": 72.6,
+          "unit": "percent",
+          "setup": "OpenAI reported",
+          "source": "https://openai.com/index/gpt-6-astra/"
+        }
+      ],
+      "tier": "genius",
+      "tierEvidence": "AA Index 57 (v5.0.1) and OpenAI's flagship at launch with a broad benchmark table.",
+      "tierUncertainty": "Superseded by GPT-6.2 Astra (62). Keep as a genius-tier fallback, not a primary, if 6.2 Astra is unavailable."
+    },
+    "gpt-6-sol": {
+      "capabilities": "Text and image input, text output, reasoning (none, low, medium default, high, xhigh, max), Responses and Chat Completions (function calling in Chat only with reasoning none), 1,050,000 API context; Codex catalog 272,000.",
+      "identityNote": "Documented upstream id gpt-6-sol (API released 2026-09-22). AA marks it deprecated in favor of GPT-6.1 Sol. The OpenAI October system card covers a separate 'GPT-6 Sol (October)' ChatGPT snapshot; the card says Codex, Work and API keep the September versions, so the October numbers are not attributed to this id.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-6-sol",
+        "https://openai.com/index/introducing-gpt-6-sol-and-luna/",
+        "https://artificialanalysis.ai/models/gpt-6-sol",
+        "https://cdn.openai.com/pdf/gpt-6-october.pdf"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 44,
+          "unit": "index points",
+          "setup": "max effort, deprecated on AA",
+          "source": "https://artificialanalysis.ai/models/gpt-6-sol"
+        },
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 68.8,
+          "unit": "percent",
+          "setup": "max effort, OpenAI reported",
+          "source": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
+        },
+        {
+          "benchmark": "Agents' Last Exam",
+          "score": 56.4,
+          "unit": "percent",
+          "setup": "max effort, OpenAI reported",
+          "source": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
+        },
+        {
+          "benchmark": "AutomationBench 1.0.6",
+          "score": 33.2,
+          "unit": "percent",
+          "setup": "xhigh effort, OpenAI reported at $0.27 per task",
+          "source": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
+        },
+        {
+          "benchmark": "OSWorld 2.0 offline (partial)",
+          "score": 60.5,
+          "unit": "percent",
+          "setup": "xhigh effort, OpenAI reported",
+          "source": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
+        }
+      ],
+      "tier": "average",
+      "tierEvidence": "AA Index 44 is near the AA median for comparable models. $2/$10 API price.",
+      "tierUncertainty": "OpenAI's launch post reports strong coding and agentic results at max effort, which may sit above AA's index. Deprecated; migrate to 6.1 or 6.2 Sol for smart tier."
+    },
+    "gpt-6-luna": {
+      "capabilities": "Text and image input, text output, reasoning (none, low, medium default, high, xhigh, max), Responses and Chat Completions (function calling in Chat only with reasoning none), 1,050,000 API context; Codex catalog 272,000. Decisions API GA host model (2026-10-22).",
+      "identityNote": "Documented upstream id gpt-6-luna (API released 2026-09-22). October system card rows refer to a separate 'GPT-6 Luna (October)' snapshot, not attributed to this id.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-6-luna",
+        "https://openai.com/index/introducing-gpt-6-sol-and-luna/",
+        "https://artificialanalysis.ai/models/gpt-6-luna",
+        "https://cdn.openai.com/pdf/gpt-6-october.pdf"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 28,
+          "unit": "index points",
+          "setup": "max effort",
+          "source": "https://artificialanalysis.ai/models/gpt-6-luna"
+        },
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 66.6,
+          "unit": "percent",
+          "setup": "max effort, OpenAI reported",
+          "source": "https://openai.com/index/introducing-gpt-6-sol-and-luna/"
+        }
+      ],
+      "tier": "dumb",
+      "tierEvidence": "AA Index 28 at $0.10/$0.50, the cheapest GPT-6 model. OpenAI markets it for focused high-volume work.",
+      "tierUncertainty": "OpenAI's launch reports DeepSWE 66.6 at max effort, well above its AA index, so the coding ability may exceed the tier label."
+    },
+    "gpt-5.6-sol": {
+      "capabilities": "Text and image input, text output, reasoning (none, low, medium default, high, xhigh, max), Responses and Chat Completions, 1,050,000 API context; Codex catalog 272,000. The gpt-5.6 alias routes here.",
+      "identityNote": "Documented upstream id gpt-5.6-sol. Promotional pricing runs until 2026-11-30. Pre-GPT-6 generation.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+        "https://artificialanalysis.ai/articles/gpt-5-6-has-landed",
+        "https://openai.com/index/introducing-gpt-6-astra/"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v4.1",
+          "score": 59,
+          "unit": "index points",
+          "setup": "max effort, July 2026 AA article; not comparable to v5.0.1",
+          "source": "https://artificialanalysis.ai/articles/gpt-5-6-has-landed"
+        },
+        {
+          "benchmark": "Artificial Analysis Coding Agent Index",
+          "score": 80,
+          "unit": "index points",
+          "setup": "max effort in Codex harness, AA",
+          "source": "https://artificialanalysis.ai/articles/gpt-5-6-has-landed"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 37.3,
+          "unit": "percent",
+          "setup": "max effort, OpenAI GPT-6 Astra comparison table",
+          "source": "https://openai.com/index/gpt-6-astra/"
+        }
+      ],
+      "tier": "smart",
+      "tierEvidence": "AA v4.1 59 and Coding Agent Index 80, the highest of the GPT-5.6 family.",
+      "tierUncertainty": "Older generation and promo-priced. Its index is on v4.1, and the same article reports 60.9 on v4.1.1 in OpenAI's table. Prefer gpt-6.2-sol for smart tier."
+    },
+    "gpt-5.6-terra": {
+      "capabilities": "Text and image input, text output, reasoning (none, low, medium default, high, xhigh, max), Responses and Chat Completions, 1,050,000 API context; Codex catalog 272,000.",
+      "identityNote": "Documented upstream id gpt-5.6-terra. Replaced by GPT-6.1 Terra per OpenAI.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-5.6-terra.md",
+        "https://artificialanalysis.ai/articles/gpt-5-6-has-landed",
+        "https://openai.com/index/introducing-gpt-6-1-terra"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v4.1",
+          "score": 55,
+          "unit": "index points",
+          "setup": "max effort, July 2026 AA article",
+          "source": "https://artificialanalysis.ai/articles/gpt-5-6-has-landed"
+        },
+        {
+          "benchmark": "Artificial Analysis Coding Agent Index",
+          "score": 77,
+          "unit": "index points",
+          "setup": "max effort, Codex harness",
+          "source": "https://artificialanalysis.ai/articles/gpt-5-6-has-landed"
+        },
+        {
+          "benchmark": "Terminal-Bench 4.0",
+          "score": 21.5,
+          "unit": "percent",
+          "setup": "max effort, as published by OpenAI when GPT-6.1 Terra launched",
+          "source": "https://openai.com/index/introducing-gpt-6-1-terra"
+        }
+      ],
+      "tier": "average",
+      "tierEvidence": "AA v4.1 55 and Terminal-Bench 4.0 21.5, both below GPT-6.1 Terra.",
+      "tierUncertainty": "Superseded by gpt-6.1-terra. Prefer that id for average tier."
+    },
+    "gpt-5.6-luna": {
+      "capabilities": "Text and image input, text output, reasoning (none, low, medium default, high, xhigh, max), Responses and Chat Completions, 1,050,000 API context; Codex catalog 272,000. The 'Codex Auto Review' model moved to Luna in July 2026 per the sources below.",
+      "identityNote": "Documented upstream id gpt-5.6-luna. Pre-GPT-6 generation, nano tier per OpenAI.",
+      "sources": [
+        "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+        "https://artificialanalysis.ai/articles/gpt-5-6-has-landed",
+        "https://github.com/openai/codex/issues/59835"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v4.1",
+          "score": 51,
+          "unit": "index points",
+          "setup": "max effort, July 2026 AA article; not comparable to v5.0.1",
+          "source": "https://artificialanalysis.ai/articles/gpt-5-6-has-landed"
+        },
+        {
+          "benchmark": "Artificial Analysis Coding Agent Index",
+          "score": 75,
+          "unit": "index points",
+          "setup": "max effort, Codex harness",
+          "source": "https://artificialanalysis.ai/articles/gpt-5-6-has-landed"
+        }
+      ],
+      "tier": "dumb",
+      "tierEvidence": "OpenAI calls it the nano-tier model. Price $0.20/$1.20 API.",
+      "tierUncertainty": "AA v4.1 51 is close to the Terra score on the same index, so average is also defensible. Low confidence."
+    },
+    "codex-auto-review": {
+      "capabilities": "Reviewer model for Codex approval escalations. Codex catalog: display 'Codex Auto Review', description 'Automatic approval review model for Codex.', context 272,000, default reasoning medium, text and image input. Local catalog lists low, medium, high, xhigh.",
+      "identityNote": "UNRESOLVED ALIAS. Codex hard-codes the slug codex-auto-review; OpenAI does not publish it as an API model page. OpenAI's Apr 30 2026 Auto-review write-up says the reviewer used GPT-5.4 Thinking (low). A July 2026 OpenAI Devs post, seen only as a search snippet and quoted in codex issue 59835, says auto review moved to GPT-5.6 Luna. X was not readable, so the GPT-5.6 Luna mapping is secondhand. Router One's listed $0.50/$3.00 price and 1.05M context are third-party and were not used.",
+      "sources": [
+        "https://openai.com/safety-alignment/auto-review/",
+        "https://raw.githubusercontent.com/openai/codex/main/codex-rs/models-manager/models.json",
+        "https://github.com/openai/codex/issues/59835",
+        "https://github.com/openai/codex/blob/main/codex-rs/core/src/guardian/reviewer_config.rs",
+        "https://router.one/models/codex-auto-review"
+      ],
+      "benchmarks": [],
+      "tier": "average",
+      "tierEvidence": "Reviewer role, not a user-facing model. Documented upstream was GPT-5.6 Luna (secondhand), which would map to dumb or average in this policy.",
+      "tierUncertainty": "Identity unverified against a primary OpenAI statement. No public benchmark exists for this alias. Null, not inferred."
+    },
+    "gemini-4-argon-high": {
+      "capabilities": "Antigravity display 'Gemini 4 Argon (High)'. Levels low/medium/high (Antigravity docs). Input text/image/audio/video, 1M context, 64K output (catalog). Sparse MoE, natively multimodal frontier model per DeepMind card (Oct 13 2026).",
+      "identityNote": "'-high' is an Antigravity tier label. The Argon card does not state effort level, so benchmark setup is unspecified. Argon is not a Carbon/Neon/Hydrogen alias.",
+      "tierEvidence": "DeepSWE v1.1 77.9 vs Opus 5.5 74.2 and Fable 5.1 67.4 (card). Terminal-bench 4.0 57.4 vs Opus 5.5 66.4 (card). Mixed; sits between opus and fable on the cited table.",
+      "tierUncertainty": "Effort unstated. Card is vendor-reported with no AA Index entry in fetched sources.",
+      "sources": [
+        "https://deepmind.google/models/model-cards/gemini-4-argon/",
+        "https://antigravity.google/docs/models",
+        "https://raw.githubusercontent.com/router-for-me/models/main/models.json"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "AutomationBench",
+          "score": 51.3,
+          "unit": "%",
+          "setup": "DeepMind card, Score column, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 77.9,
+          "unit": "%",
+          "setup": "DeepMind card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "FrontierSWE v2",
+          "score": 55.0,
+          "unit": "%",
+          "setup": "DeepMind card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "Terminal-bench 4.0",
+          "score": 57.4,
+          "unit": "%",
+          "setup": "DeepMind card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "Terminal-Bench-Science 0.1",
+          "score": 57.6,
+          "unit": "%",
+          "setup": "DeepMind card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "GraphWalks",
+          "score": 99.7,
+          "unit": "% F1",
+          "setup": "Up to 128k, BFS, DeepMind card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "GraphWalks",
+          "score": 84.2,
+          "unit": "% F1",
+          "setup": "256k to 1M, BFS, DeepMind card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "OSWorld-2.0",
+          "score": 69.2,
+          "unit": "% partial",
+          "setup": "Offline subset, DeepMind card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        },
+        {
+          "benchmark": "Chartography",
+          "score": 71.6,
+          "unit": "%",
+          "setup": "DeepMind card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-argon/"
+        }
+      ],
+      "tier": "smart"
+    },
+    "gemini-4-hydrogen-xhigh": {
+      "capabilities": "Antigravity display 'Gemini 4 Hydrogen (XHigh)'. Levels low/medium/high/xhigh (xhigh = Antigravity 'Extra'). 1M context, 64K default output. Built for fast execution; adapted from Gemini 4 Carbon.",
+      "identityNote": "Card numbers are not stated at xhigh. Card says 'four thinking levels' without mapping. Antigravity docs state Extra = xhigh. Card's comparison set is Sonnet 5.5 and GPT-6.1 Terra.",
+      "tierEvidence": "Beats Sonnet 5.5 on SWE-sweep 13.5 vs 3.1, AutomationBench-AA 76.1 vs 71.8, HLE-Diamond 58.8 vs 53.3. Trails Sonnet 5.5 on Terminal-Bench 4.1 57.0 vs 63.9 and OSWorld-2.1 77.6 vs 83.9. Sonnet-equivalent on the card's own table.",
+      "tierUncertainty": "Effort level for card values unknown. Card is vendor-reported. No AA entry for Hydrogen in fetched sources.",
+      "sources": [
+        "https://deepmind.google/models/model-cards/gemini-4-hydrogen/",
+        "https://antigravity.google/docs/models",
+        "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-hydrogen"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Terminal-Bench 4.1",
+          "score": 57.0,
+          "unit": "% cheating-adjusted",
+          "setup": "Hydrogen card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+        },
+        {
+          "benchmark": "Agents' Last Exam v1.1",
+          "score": 71.6,
+          "unit": "%",
+          "setup": "Hydrogen card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+        },
+        {
+          "benchmark": "AutomationBench-AA",
+          "score": 76.1,
+          "unit": "%",
+          "setup": "Hydrogen card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+        },
+        {
+          "benchmark": "OSWorld-2.1",
+          "score": 77.6,
+          "unit": "% offline subset",
+          "setup": "Hydrogen card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+        },
+        {
+          "benchmark": "Chartography",
+          "score": 66.6,
+          "unit": "%",
+          "setup": "Hydrogen card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+        },
+        {
+          "benchmark": "Terminal-Bench-Science 0.1",
+          "score": 51.4,
+          "unit": "%",
+          "setup": "Hydrogen card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+        },
+        {
+          "benchmark": "HLE-Diamond",
+          "score": 58.8,
+          "unit": "%",
+          "setup": "Hydrogen card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+        }
+      ],
+      "tier": "average"
+    },
+    "gemini-4-neon-xhigh": {
+      "capabilities": "Antigravity display 'Gemini 4 Neon (XHigh)'. Levels low/medium/high/xhigh. 1M context per DeepMind and AA (Antigravity docs say 512K). Pricing $3/$15 per 1M (AA). Frontier-level reasoning at lower cost than Carbon.",
+      "identityNote": "Only the AA article states effort (xhigh) for its scores. Card values have no effort stated. Antigravity context (512K) conflicts with card and AA (1M); repo catalog uses 1048576.",
+      "tierEvidence": "AA Intelligence Index 61 (xhigh), 3rd overall behind GPT-6.2 Astra (max) and Claude Fable 5.2 (max). Card: beats Opus 5.5 on most rows (e.g. SWE-sweep 39.0 vs 10.1; GraphWalks 95.2 vs 66.8). Trails Opus 5.5 on FrontierCode 2.0 (46.2 vs 47.3) and Terminal-bench 4.1 (65.2 vs 65.8). AA Coding Agent Index 59 (xhigh) vs Claude Opus 5.5 (max) 58 and Fable 5.2 (xhigh) 58.",
+      "tierUncertainty": "Upper-smart vs genius is a close call against Fable 5.2 (AA data). Card numbers are vendor-reported with unstated effort.",
+      "sources": [
+        "https://deepmind.google/models/model-cards/gemini-4-neon/",
+        "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain",
+        "https://antigravity.google/docs/models"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index",
+          "score": 61,
+          "unit": "index points",
+          "setup": "AA article, Neon xhigh; article does not state version",
+          "source": "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain"
+        },
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v5.0.1",
+          "score": 61,
+          "unit": "index points",
+          "setup": "DeepMind card table, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "Artificial Analysis Coding Agent Index",
+          "score": 59,
+          "unit": "index points",
+          "setup": "AA, Neon xhigh with Antigravity CLI",
+          "source": "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain"
+        },
+        {
+          "benchmark": "GDP.pdf",
+          "score": 28.0,
+          "unit": "%",
+          "setup": "AA, Neon xhigh",
+          "source": "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain"
+        },
+        {
+          "benchmark": "GDP.pdf",
+          "score": 33.4,
+          "unit": "%",
+          "setup": "AA, Neon high",
+          "source": "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain"
+        },
+        {
+          "benchmark": "AA-Briefcase",
+          "score": 1700,
+          "unit": "Elo",
+          "setup": "AA, Neon xhigh, overall",
+          "source": "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain"
+        },
+        {
+          "benchmark": "CursorBench 4.1",
+          "score": 65.4,
+          "unit": "% score",
+          "setup": "Neon card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "Terminal-bench 4.1",
+          "score": 65.2,
+          "unit": "% cheating-adjusted",
+          "setup": "Neon card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "FrontierCode 2.0",
+          "score": 46.2,
+          "unit": "% main score",
+          "setup": "Neon card, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "AutomationBench",
+          "score": 56.3,
+          "unit": "%",
+          "setup": "Neon card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "Agents' Last Exam v1.1",
+          "score": 75.8,
+          "unit": "%",
+          "setup": "Neon card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "Terminal-Bench-Science 0.1",
+          "score": 70.5,
+          "unit": "%",
+          "setup": "Neon card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "HLE-Diamond",
+          "score": 71.3,
+          "unit": "%",
+          "setup": "Neon card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "Chartography",
+          "score": 73.5,
+          "unit": "%",
+          "setup": "Neon card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        },
+        {
+          "benchmark": "GraphWalks",
+          "score": 95.2,
+          "unit": "% F1",
+          "setup": "256k to 1M, BFS, Neon card",
+          "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+        }
+      ],
+      "tier": "smart"
+    },
+    "gemini-3.8-flash-high": {
+      "capabilities": "Antigravity display 'Gemini 3.8 Flash (High)'. Levels low/medium/high. 1M context, 64K output. Price $0.75/$3.75 per 1M (card, Antigravity blog). Daily workhorse per Antigravity.",
+      "identityNote": "Card describes the Gemini 3.8 Flash model with 'customizable effort levels' and does not state which level its numbers use. Mapping '-high' to the card's numbers is an assumption.",
+      "tierEvidence": "DeepSWE v1.1 73.7 vs Sonnet 5 53.8 and Opus 5 74.0. Terminal-bench 2.1 89.4 vs Opus 5 89.1 and Sonnet 5 80.4. Harvey LAB 10.0 vs Opus 5 6.7. Approaches Opus 5 on coding but is Flash-priced. Average is a cost-based judgement.",
+      "tierUncertainty": "High. Several rows match or beat Opus 5, but the table is single-vendor and effort is unstated. Smart is defensible on coding rows.",
+      "sources": [
+        "https://deepmind.google/models/model-cards/gemini-3-8-flash/",
+        "https://antigravity.google/blog/gemini-3-8-flash-in-google-antigravity",
+        "https://antigravity.google/docs/models"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 73.7,
+          "unit": "%",
+          "setup": "3.8 Flash card, Sep 2026, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-8-flash/"
+        },
+        {
+          "benchmark": "GDPval-AA v2",
+          "score": 1545,
+          "unit": "Elo",
+          "setup": "3.8 Flash card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-8-flash/"
+        },
+        {
+          "benchmark": "Terminal-bench 2.1",
+          "score": 89.4,
+          "unit": "%",
+          "setup": "3.8 Flash card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-8-flash/"
+        },
+        {
+          "benchmark": "Terminal-bench 4.0",
+          "score": 19.1,
+          "unit": "%",
+          "setup": "3.8 Flash card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-8-flash/"
+        },
+        {
+          "benchmark": "GDP.PDF",
+          "score": 35.0,
+          "unit": "% all pass rate",
+          "setup": "3.8 Flash card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-8-flash/"
+        },
+        {
+          "benchmark": "HLE-Verified",
+          "score": 54.9,
+          "unit": "%",
+          "setup": "3.8 Flash card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-8-flash/"
+        },
+        {
+          "benchmark": "OSWorld-2.0",
+          "score": 59.0,
+          "unit": "% partial, batch tool enabled",
+          "setup": "3.8 Flash card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-8-flash/"
+        }
+      ],
+      "tier": "average"
+    },
+    "gemini-3.8-flash-tiered": {
+      "capabilities": "Antigravity shared tier id 'Gemini 3.8 Flash (Tiered)'. Same levels as -high (low/medium/high). 1M context, 64K output.",
+      "identityNote": "No published benchmark or spec matches this key (Tokscale: 'no benchmark result and no models.dev entry'). Do NOT inherit Gemini 3.8 Flash card scores. OmniRoute reports (third-party, unverified) that some accounts list only this id and reject -high/-medium/-low.",
+      "tierEvidence": "No sourced evidence for this id. Tier is provisional, inherited from the 3.8 Flash family policy only.",
+      "tierUncertainty": "Very high. Treat as unscored until a live call or vendor source names the model behind this id.",
+      "sources": [
+        "https://tokscale.ai/models/gemini-3.8-flash-tiered",
+        "https://github.com/cheaper-inference/OmniRoute/issues/15659",
+        "https://github.com/diegosouzapw/OmniRoute/issues/16237"
+      ],
+      "benchmarks": [],
+      "tier": "average"
+    },
+    "gemini-3-flash": {
+      "capabilities": "Antigravity display 'Gemini 3 Flash'. Levels minimal/low/medium/high. 1M context, 64K output. Launched Dec 17 2025 at $0.50/$3 per 1M.",
+      "identityNote": "The Dec 2025 model card has no numeric table in fetched text. Launch-blog figures are for the Gemini 3 Flash model at its highest thinking level. Dated; not the 3.8 family.",
+      "tierEvidence": "Launch blog: SWE-bench Verified 78% (above Gemini 3 Pro per Google), GPQA Diamond 90.4, HLE 33.7 without tools, MMMU-Pro 81.2. Dated, Dec 2025 comparators (Sonnet 4.5, GPT-5.2).",
+      "tierUncertainty": "High. Comparators are over a year old relative to the 2026 Sonnet/Opus 5 tier.",
+      "sources": [
+        "https://blog.google/products-and-platforms/products/gemini/gemini-3-flash/",
+        "https://storage.googleapis.com/deepmind-media/Model-Cards/Gemini-3-Flash-Model-Card.pdf"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "SWE-bench Verified",
+          "score": 78,
+          "unit": "%",
+          "setup": "Gemini 3 Flash launch blog, Dec 2025",
+          "source": "https://blog.google/products-and-platforms/products/gemini/gemini-3-flash/"
+        },
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 33.7,
+          "unit": "% without tools",
+          "setup": "Launch blog, Dec 2025",
+          "source": "https://blog.google/products-and-platforms/products/gemini/gemini-3-flash/"
+        }
+      ],
+      "tier": "average"
+    },
+    "gemini-3.5-flash-lite": {
+      "capabilities": "Antigravity display 'Gemini 3.5 Flash Lite'. Levels minimal/low/medium/high. 1M context, 64K output. Published July 21 2026. Based on Gemini 3.1 Flash-Lite. $0.30/$2.50 per 1M.",
+      "identityNote": "Card comparators are GPT-5.4 mini and Claude Haiku 4.5 (dated). Effort level not stated.",
+      "tierEvidence": "Card: SWE-Bench Pro 54.2 vs Haiku 4.5 39.5. Terminal-bench 2.1 54.0 vs Haiku 4.5 44.2. Cost tier is Flash-Lite. Above Haiku 4.5 on the card, but Haiku 5.5 is not in its comparison set.",
+      "tierUncertainty": "Medium. Haiku-equivalence is against a dated Haiku 4.5, not Haiku 5.5. Could be average on some rows.",
+      "sources": [
+        "https://deepmind.google/models/model-cards/gemini-3-5-flash-lite/",
+        "https://storage.googleapis.com/deepmind-media/Model-Cards/Gemini-3-5-Flash-Lite-Model-Card.pdf"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "SWE-Bench Pro (Public)",
+          "score": 54.2,
+          "unit": "%",
+          "setup": "3.5 Flash-Lite card, Jul 2026, effort not stated",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-5-flash-lite/"
+        },
+        {
+          "benchmark": "Terminal-bench 2.1",
+          "score": 54.0,
+          "unit": "% Terminus-2 harness",
+          "setup": "3.5 Flash-Lite card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-5-flash-lite/"
+        },
+        {
+          "benchmark": "GDPval-AA v2",
+          "score": 1140,
+          "unit": "Elo",
+          "setup": "3.5 Flash-Lite card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-5-flash-lite/"
+        },
+        {
+          "benchmark": "OSWorld-Verified",
+          "score": 74.0,
+          "unit": "%",
+          "setup": "3.5 Flash-Lite card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-5-flash-lite/"
+        },
+        {
+          "benchmark": "GDM-MRCR v2 (8-needle)",
+          "score": 72.2,
+          "unit": "% 128k average",
+          "setup": "3.5 Flash-Lite card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-5-flash-lite/"
+        },
+        {
+          "benchmark": "GDM-MRCR v2 (8-needle)",
+          "score": 21.3,
+          "unit": "% 1M pointwise",
+          "setup": "3.5 Flash-Lite card",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-5-flash-lite/"
+        }
+      ],
+      "tier": "dumb"
+    },
+    "gemini-3.1-flash-lite": {
+      "capabilities": "Antigravity display 'Gemini 3.1 Flash Lite'. Levels minimal/low/medium/high. 1M context, 64K output. Published Mar 3 2026. $0.25/$1.50 per 1M.",
+      "identityNote": "Card table is for 'Gemini 3.1 Flash-Lite High'. Antigravity effort mapping is not stated. Card comparators (Haiku 4.5, GPT-5 mini) are dated.",
+      "tierEvidence": "Card (High): GPQA Diamond 86.9, HLE 16.0, LiveCodeBench 72.0, MRCR 128k 60.1. Output 363 tok/s. Flash-Lite cost class; mid-tier on these rows, ahead of Haiku 4.5 on the card.",
+      "tierUncertainty": "Medium. Could be average on knowledge rows. Assignment rests on cost class and comparator.",
+      "sources": [
+        "https://deepmind.google/models/model-cards/gemini-3-1-flash-lite/",
+        "https://storage.googleapis.com/deepmind-media/Model-Cards/Gemini-3-1-Flash-Lite-Model-Card.pdf"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Humanity's Last Exam",
+          "score": 16.0,
+          "unit": "% no tools",
+          "setup": "3.1 Flash-Lite card, High",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-1-flash-lite/"
+        },
+        {
+          "benchmark": "GDM-MRCR v2 (8-needle)",
+          "score": 60.1,
+          "unit": "% 128k average",
+          "setup": "3.1 Flash-Lite card, High",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-1-flash-lite/"
+        },
+        {
+          "benchmark": "GDM-MRCR v2 (8-needle)",
+          "score": 12.3,
+          "unit": "% 1M pointwise",
+          "setup": "3.1 Flash-Lite card, High",
+          "source": "https://deepmind.google/models/model-cards/gemini-3-1-flash-lite/"
+        }
+      ],
+      "tier": "dumb"
+    },
+    "glm-5.3": {
+      "capabilities": "Text-only input, 1M context, 128K max output. Always-on reasoning; reasoning_effort low/high/max (default max); thinking.type 'disabled' rejected. Same base model as GLM-5.2; gains from post-training. Weights promised two weeks after launch (blog).",
+      "identityNote": "Z.AI documents glm-5.3 as its own API id. Coding Plan auto-switch rules (docs.bigmodel.cn) map GLM-5.2 and GLM-5.1 onto glm-5.3. The repo's claim that the plan serves all GLM ids as 5.3 or 5.3-flash covers more than Z.AI documents. Blog and page benchmarks are Z.AI self-reported; 'from X to Y' rows name no baseline model in the sentence. The 4.6/46.2/23.8 baselines match GLM-5.2 values in the same post, so baseline is GLM-5.2 [INFERENCE].",
+      "tierEvidence": "Z.AI blog table: Terminal Bench 2.1 88.2 vs Fable 5 88.0, Opus 4.8 85.0, GPT-5.6 Sol 88.8. DeepSWE v1.1 66.9 vs Fable 5 69.7, Opus 4.8 58.0. FrontierSWE 78.1 vs Fable 5 88.2, Opus 4.8 66.5. CyberGym 84.5 vs Fable 5 83.8. Lands between opus and fable on the self-reported table.",
+      "tierUncertainty": "High. Self-reported table with Z.AI's own harnesses and comparator runs; Fable-level on several rows. Not independently replicated in fetched sources.",
+      "sources": [
+        "https://z.ai/blog/glm-5.3",
+        "https://docs.z.ai/guides/llm/glm-5.3",
+        "https://docs.z.ai/devpack/faq",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Terminal-Bench 2.1",
+          "score": 88.2,
+          "unit": "%",
+          "setup": "Z.AI blog table; Claude Code 2.1.207, temp 1.0, 6h timeout",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "Terminal-Bench 3.0",
+          "score": 28.3,
+          "unit": "%",
+          "setup": "Z.AI blog; Claude Code 2.1.207, reasoning max, avg@3, 10h timeout",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 66.9,
+          "unit": "%",
+          "setup": "Z.AI blog; mini-swe-agent, temp 0.95, 6h, 400K context",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "FrontierSWE",
+          "score": 78.1,
+          "unit": "% dominance score",
+          "setup": "Evaluated by Proximal, 1M context, max effort, as of 2026-08-14",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "CyberGym",
+          "score": 84.5,
+          "unit": "% Pass@1",
+          "setup": "Z.AI blog; 1,507 tasks, Claude Code 2.1.207, max effort, single run",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "ExploitBench",
+          "score": 54.4,
+          "unit": "% coverage",
+          "setup": "Z.AI blog; 41 tasks, 3 revisions, max effort",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "Toolathlon Verified",
+          "score": 73.0,
+          "unit": "% pass@1 avg of 3",
+          "setup": "Z.AI blog; official service",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "AutomationBench v1.0.6",
+          "score": 48.2,
+          "unit": "%",
+          "setup": "Z.AI blog (v1.0.6 with null-handling fix). Differs from 48.8 on the Flash page: different model",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "Agents' Last Exam ALE-CLI",
+          "score": 28.5,
+          "unit": "%",
+          "setup": "Z.AI blog; 105 tasks, Claude Code harness, reasoning max, 1M context",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "HLE w/ Tools",
+          "score": 62.5,
+          "unit": "%",
+          "setup": "Z.AI blog; temp 1.0, top_p 0.95, judge GPT-5.6-luna",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "GDPval-AA v2",
+          "score": 1769,
+          "unit": "Elo",
+          "setup": "Z.AI blog; evaluated by Artificial Analysis",
+          "source": "https://z.ai/blog/glm-5.3"
+        },
+        {
+          "benchmark": "Z.ai Code Bench (in-house)",
+          "score": 34.5,
+          "unit": "% at max effort (~75K output tokens)",
+          "setup": "Z.AI in-house; private; version not stated",
+          "source": "https://docs.z.ai/guides/llm/glm-5.3"
+        },
+        {
+          "benchmark": "Z.ai Code Bench (in-house)",
+          "score": 31.4,
+          "unit": "% at high effort (~50K output tokens)",
+          "setup": "Z.AI in-house",
+          "source": "https://docs.z.ai/guides/llm/glm-5.3"
+        }
+      ],
+      "tier": "smart"
+    },
+    "glm-5.3-flash": {
+      "capabilities": "Native multimodal (video, image, text, file input), text output. 1M context, 128K max output. 320B total / 18B active, sparse + linear attention hybrid. Reasoning always on (low/high/max); 'thinking.type' only enabled. FlashX is not on the plan.",
+      "identityNote": "Z.AI documents glm-5.3-flash as its own API id. Coding Plan auto-switch maps GLM-5-Turbo and GLM-4.7 onto glm-5.3-flash, so glm-5-turbo and glm-4.7 proxy ids do not serve their original models. Flash benchmarks belong to GLM-5.3-Flash only. Repo's flash comment says 'glm-5.3-flashx: subscription excludes it'. Z.AI says the same.",
+      "tierEvidence": "AA Intelligence Index v4.1.1 = 57 at $0.045/task (discounted). Z.AI: 'approaching Claude Opus 4.8'; Z.AI Code Bench v1.0 max effort 29.0 vs Opus 4.8 29.5. Z.AI blog table row: AutomationBench v1.0.6 for GLM-5.3-Flash page reports 48.8. Average-to-smart; cost-performance argues average.",
+      "tierUncertainty": "Medium. Scores rely on the Z.AI page and an AA index version that differs from the Neon card's v5.0.1. Opus 4.8 reference is self-reported.",
+      "sources": [
+        "https://docs.z.ai/guides/vlm/glm-5.3-flash",
+        "https://docs.z.ai/devpack/latest-model",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [
+        {
+          "benchmark": "Artificial Analysis Intelligence Index v4.1.1",
+          "score": 57,
+          "unit": "index points",
+          "setup": "Z.AI Flash page; $0.045 per task (discounted)",
+          "source": "https://docs.z.ai/guides/vlm/glm-5.3-flash"
+        },
+        {
+          "benchmark": "DeepSWE v1.1",
+          "score": 63.4,
+          "unit": "%",
+          "setup": "Z.AI Flash page; same benchmark as GLM-5.3 66.9 row (different model)",
+          "source": "https://docs.z.ai/guides/vlm/glm-5.3-flash"
+        },
+        {
+          "benchmark": "AutomationBench",
+          "score": 48.8,
+          "unit": "%",
+          "setup": "Z.AI Flash page; vs 26.2 for GLM-5.2",
+          "source": "https://docs.z.ai/guides/vlm/glm-5.3-flash"
+        },
+        {
+          "benchmark": "Z.ai Code Bench v1.0",
+          "score": 29.0,
+          "unit": "% at max effort",
+          "setup": "Z.AI Flash page; run on Claude Code 2.1.207",
+          "source": "https://docs.z.ai/guides/vlm/glm-5.3-flash"
+        }
+      ],
+      "tier": "average"
+    },
+    "glm-5.2": {
+      "capabilities": "Coding Plan alias for glm-5.3. Use live declared context, modality and effort limits, which may be narrower than the backend. Original namesake capabilities and benchmarks do not describe this route.",
+      "identityNote": "Coding Plan auto-switches calls to glm-5.2 onto GLM-5.3 (docs.bigmodel.cn). glm-5.2 is a Z.AI-documented id but not a plan-served model. Its own scores below are Z.AI-reported; the 5.2 benchmark values are baselines in GLM-5.3 pages. Consult the canonical backend profile for reference scores; this proxy alias has no independent measurements.",
+      "tierEvidence": "Policy follows documented Coding Plan backend glm-5.3; not an independent proxy benchmark.",
+      "tierUncertainty": "Medium. Vendor claims only. Opus 4.8 comparison, not 5.5.",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-5.2",
+        "https://z.ai/blog/glm-5.3",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [],
+      "tier": "smart",
+      "effectiveModel": "glm-5.3"
+    },
+    "glm-5.1": {
+      "capabilities": "Coding Plan alias for glm-5.3. Use live declared context, modality and effort limits, which may be narrower than the backend. Original namesake capabilities and benchmarks do not describe this route.",
+      "identityNote": "Coding Plan auto-switches glm-5.1 to GLM-5.3 (docs.bigmodel.cn). Scores belong to GLM-5.1 only. Consult the canonical backend profile for reference scores; this proxy alias has no independent measurements.",
+      "tierEvidence": "Policy follows documented Coding Plan backend glm-5.3; not an independent proxy benchmark.",
+      "tierUncertainty": "Medium-high. Comparators at launch are older than the Sonnet 5.5 tier.",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-5.1",
+        "https://docs.z.ai/guides/llm/glm-5.2"
+      ],
+      "benchmarks": [],
+      "tier": "smart",
+      "effectiveModel": "glm-5.3"
+    },
+    "glm-5-turbo": {
+      "capabilities": "Coding Plan alias for glm-5.3-flash. Use live declared context, modality and effort limits, which may be narrower than the backend. Original namesake capabilities and benchmarks do not describe this route.",
+      "identityNote": "Coding Plan auto-switches glm-5-turbo to GLM-5.3-Flash (docs.bigmodel.cn). Its ZClawBench scores are for GLM-5-Turbo (OpenClaw). They must not be attributed to proxy glm-5-turbo on the plan, which serves GLM-5.3-Flash. Consult the canonical backend profile for reference scores; this proxy alias has no independent measurements.",
+      "tierEvidence": "Policy follows documented Coding Plan backend glm-5.3-flash; not an independent proxy benchmark.",
+      "tierUncertainty": "Very high. No numeric evidence fetched.",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-5-turbo",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [],
+      "tier": "average",
+      "effectiveModel": "glm-5.3-flash"
+    },
+    "glm-5": {
+      "capabilities": "Legacy Coding Plan alias; exact backend mapping unverified. Use only live declared text input, context and reasoning limits. Historical model scores are not evidence for this proxy route.",
+      "identityNote": "Z.AI page does not state a Coding Plan mapping for glm-5. Coding Plan auto-switch rules name only GLM-5.2, GLM-5.1, GLM-5-Turbo and GLM-4.7. Mapping of glm-5 on the plan is unverified.",
+      "tierEvidence": "SWE-bench Verified 77.8 and Terminal Bench 2.0 56.2 (open-model leading at launch, Z.AI claim). Z.AI says coding approaches Opus 4.5. Sonnet-equivalent on Opus 4.5-era comparators.",
+      "tierUncertainty": "High: legacy namesake and actual Coding Plan backend may differ; tier is provisional operator policy.",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-5",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [],
+      "tier": "average"
+    },
+    "glm-4.7": {
+      "capabilities": "Coding Plan alias for glm-5.3-flash. Use live declared context, modality and effort limits, which may be narrower than the backend. Original namesake capabilities and benchmarks do not describe this route.",
+      "identityNote": "Coding Plan auto-switches glm-4.7 to GLM-5.3-Flash (docs.bigmodel.cn). Scores below are GLM-4.7 only, not GLM-5.3-Flash. Consult the canonical backend profile for reference scores; this proxy alias has no independent measurements.",
+      "tierEvidence": "Policy follows documented Coding Plan backend glm-5.3-flash; not an independent proxy benchmark.",
+      "tierUncertainty": "Medium-high. Comparator is Sonnet 4.5 (dated).",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-4.7",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [],
+      "tier": "average",
+      "effectiveModel": "glm-5.3-flash"
+    },
+    "glm-4.6": {
+      "capabilities": "Legacy Coding Plan alias; exact backend mapping unverified. Use only live declared text input, context and reasoning limits. Historical model scores are not evidence for this proxy route.",
+      "identityNote": "Z.AI does not state a Coding Plan mapping for glm-4.6. Numeric scores exist only in an image. Mapping unverified.",
+      "tierEvidence": "Z.AI says performance is on par with Claude Sonnet 4 / Sonnet 4.6 on several leaderboards (image data, no numbers fetched).",
+      "tierUncertainty": "High: legacy namesake and actual Coding Plan backend may differ; tier is provisional operator policy.",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-4.6",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [],
+      "tier": "average"
+    },
+    "glm-4.5": {
+      "capabilities": "Legacy Coding Plan alias; exact backend mapping unverified. Use only live declared text input, context and reasoning limits. Historical model scores are not evidence for this proxy route.",
+      "identityNote": "Z.AI does not state a Coding Plan mapping. No numeric scores in fetched text. Air is a separate model (106B/12B); do not share scores.",
+      "tierEvidence": "Z.AI aggregate claim at launch: 2nd globally across 12 suites (chart only). Real-world Claude Code comparison vs Claude 4 Sonnet described as 'largely comparable' in most scenarios. Average on Z.AI's own comparator.",
+      "tierUncertainty": "High: legacy namesake and actual Coding Plan backend may differ; tier is provisional operator policy.",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-4.5",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [],
+      "tier": "average"
+    },
+    "glm-4.5-air": {
+      "capabilities": "Legacy Coding Plan alias; exact backend mapping unverified. Use only live declared text input, context and reasoning limits. Historical model scores are not evidence for this proxy route.",
+      "identityNote": "Z.AI documents Air as a separate model from GLM-4.5. Coding Plan mapping not stated. No numeric per-model scores in fetched text; Z.AI claims (AA reasoning comparison) are not numeric.",
+      "tierEvidence": "12B active parameters and Air-class cost. Z.AI says it surpasses Gemini 2.5 Flash and Claude 4 Opus on AA reasoning benchmarks, but gives no numeric score. Haiku-equivalent is a cost-class judgement.",
+      "tierUncertainty": "High: legacy namesake and actual Coding Plan backend may differ; tier is provisional operator policy.",
+      "sources": [
+        "https://docs.z.ai/guides/llm/glm-4.5",
+        "https://docs.bigmodel.cn/cn/coding-plan/overview"
+      ],
+      "benchmarks": [],
+      "tier": "dumb"
+    }
+  },
+  "benchmarks": {
+    "Terminal-Bench-Science 0.1": {
+      "description": "Agentic scientific research tasks.",
+      "caveat": "Standard error ±3.5–4.5 pts per model per Anthropic. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-fable-and-mythos-5-1"
+    },
+    "Terminal-Bench 4.0": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "GDPval-AA v2": {
+      "description": "Artificial Analysis Elo on real professional tasks.",
+      "caveat": "v2 vs v2.1 vs earlier versions are not comparable. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/gdpval-aa"
+    },
+    "OSWorld 2.0": {
+      "description": "Computer-use benchmarks.",
+      "caveat": "Versions and subsets differ (offline subset, partial score, batch tools). Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+    },
+    "Humanity's Last Exam": {
+      "description": "Humanity's Last Exam variants.",
+      "caveat": "Tool access, subsets and judge differ. Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "AutomationBench": {
+      "description": "End-to-end business workflow pass rate.",
+      "caveat": "Opus 5 card says 26.0, Opus 5.5 card says 26.9 for the same model. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+    },
+    "CursorBench 3.2.0": {
+      "description": "Multi-file ambiguous coding tasks from real Cursor sessions.",
+      "caveat": "Versions 3.2 and 4.0 are not comparable. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "SWE-bench Pro": {
+      "description": "Harder real-repository SWE-bench variant.",
+      "caveat": "Not comparable to Verified. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+    },
+    "SWE-bench Multilingual": {
+      "description": "Real repository issue resolution across multiple programming languages; broader language coverage than the Python-focused Verified set.",
+      "caveat": "Vendor-reported runs; harness not comparable across vendors. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://docs.z.ai/guides/llm/glm-5.2"
+    },
+    "Terminal-Bench 4.0 (Artificial Analysis run)": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "FrontierCode 1.1 (Main)": {
+      "description": "Whether an agent's code change would be merged (Cognition).",
+      "caveat": "Effort-dependent; rows vary by effort level. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "CursorBench 4.0": {
+      "description": "Multi-file ambiguous coding tasks from real Cursor sessions.",
+      "caveat": "Versions 3.2 and 4.0 are not comparable. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "HealthBench Professional": {
+      "description": "Healthcare professional evaluation.",
+      "caveat": "Single Anthropic table. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+    },
+    "GDPval-AA v2.1": {
+      "description": "Artificial Analysis Elo on real professional tasks.",
+      "caveat": "v2 vs v2.1 vs earlier versions are not comparable. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/gdpval-aa"
+    },
+    "AA-Briefcase v1.1": {
+      "description": "Long-horizon knowledge work Elo (AA).",
+      "caveat": "Version v1.1 for current models. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/articles/claude-opus-5-5"
+    },
+    "Artificial Analysis Intelligence Index v5": {
+      "description": "Composite measure of general reasoning, knowledge and agentic work across the suites in that index version; index points are not percent accuracy.",
+      "caveat": "Versions differ: v4.1 (GPT-5.6 article, July 2026), v4.1.1 (OpenAI table), v5.0.1 (current AA model pages). Scores across versions are not comparable. AA reports max effort unless noted. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index"
+    },
+    "SWE-bench Verified": {
+      "description": "500 human-verified GitHub issue fixes.",
+      "caveat": "Many models saturated; prompt modifications change scores. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+    },
+    "DeepSWE v1.1": {
+      "description": "Long-horizon software engineering in real codebases.",
+      "caveat": "OpenAI-reported launch numbers at max effort; not independently run here. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepswe.datacurve.ai/"
+    },
+    "AA-Briefcase": {
+      "description": "Long-horizon knowledge work Elo (AA).",
+      "caveat": "Version v1.1 for current models. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/articles/claude-opus-5-5"
+    },
+    "Terminal-Bench 2.1": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "GDPval-AA": {
+      "description": "Artificial Analysis Elo on real professional tasks.",
+      "caveat": "v2 vs v2.1 vs earlier versions are not comparable. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/gdpval-aa"
+    },
+    "OSWorld-Verified": {
+      "description": "Computer-use benchmarks.",
+      "caveat": "Versions and subsets differ (offline subset, partial score, batch tools). Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+    },
+    "CursorBench": {
+      "description": "Multi-file ambiguous coding tasks from real Cursor sessions.",
+      "caveat": "Versions 3.2 and 4.0 are not comparable. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "MRCR v2 (8-needle, 1M)": {
+      "description": "Long-context multi-needle retrieval.",
+      "caveat": "Report by context bucket (128k average, 1M pointwise). The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-3-1-flash-lite/"
+    },
+    "Terminal-Bench 2.0": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "FrontierCode 1.1 (Main), Max": {
+      "description": "Whether an agent's code change would be merged (Cognition).",
+      "caveat": "Effort-dependent; rows vary by effort level. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "FrontierCode 1.1 (Main), Xhigh": {
+      "description": "Whether an agent's code change would be merged (Cognition).",
+      "caveat": "Effort-dependent; rows vary by effort level. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "OSWorld 2.1": {
+      "description": "Computer-use benchmarks.",
+      "caveat": "Versions and subsets differ (offline subset, partial score, batch tools). Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+    },
+    "Chartography": {
+      "description": "Visual chart recognition.",
+      "caveat": "No tools. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "SWE-bench Verified (prompt-modified)": {
+      "description": "500 human-verified GitHub issue fixes.",
+      "caveat": "Many models saturated; prompt modifications change scores. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+    },
+    "Artificial Analysis Intelligence Index": {
+      "description": "Composite measure of general reasoning, knowledge and agentic work across the suites in that index version; index points are not percent accuracy.",
+      "caveat": "Versions differ: v4.1 (GPT-5.6 article, July 2026), v4.1.1 (OpenAI table), v5.0.1 (current AA model pages). Scores across versions are not comparable. AA reports max effort unless noted. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index"
+    },
+    "OSWorld 2.1 (offline subset)": {
+      "description": "Computer-use benchmarks.",
+      "caveat": "Versions and subsets differ (offline subset, partial score, batch tools). Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+    },
+    "Artificial Analysis Intelligence Index v5.0.1": {
+      "description": "Composite measure of general reasoning, knowledge and agentic work across the suites in that index version; index points are not percent accuracy.",
+      "caveat": "Versions differ: v4.1 (GPT-5.6 article, July 2026), v4.1.1 (OpenAI table), v5.0.1 (current AA model pages). Scores across versions are not comparable. AA reports max effort unless noted. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index"
+    },
+    "AA-3D Elo": {
+      "description": "Human-judged blind preference for interactive 3D experiences.",
+      "caveat": "Elo from one AA run; small sample. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/articles/openai-has-the-2-model-in-the-intelligence-index-with-the-release-of-gpt-6-2-astra-and-gpt-6-2-sol"
+    },
+    "AA-Robotics v0.1": {
+      "description": "AA research-preview robotics planning and action tasks.",
+      "caveat": "Research preview, task set still expanding per AA. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/articles/openai-has-the-2-model-in-the-intelligence-index-with-the-release-of-gpt-6-2-astra-and-gpt-6-2-sol"
+    },
+    "Artificial Analysis Intelligence Index v4.1.1": {
+      "description": "Composite measure of general reasoning, knowledge and agentic work across the suites in that index version; index points are not percent accuracy.",
+      "caveat": "Versions differ: v4.1 (GPT-5.6 article, July 2026), v4.1.1 (OpenAI table), v5.0.1 (current AA model pages). Scores across versions are not comparable. AA reports max effort unless noted. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index"
+    },
+    "ExploitBench": {
+      "description": "Turning known V8/Chrome vulnerabilities into code execution.",
+      "caveat": "Measured without production safeguards; results may be inflated by public historical vulnerabilities. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://openai.com/index/gpt-6-astra/"
+    },
+    "OSWorld 2.0 offline (partial)": {
+      "description": "Computer-use benchmarks.",
+      "caveat": "Versions and subsets differ (offline subset, partial score, batch tools). Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+    },
+    "Agents' Last Exam": {
+      "description": "Agentic exam benchmark; Z.AI uses ALE-CLI (105 tasks, Claude Code harness).",
+      "caveat": "Names vary across vendors (Agents' Last Exam v1.1, Agents' Last Exam ALE-CLI, Agent's Last Exam pass rate). Compare only within the same name and version. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "AutomationBench 1.0.6": {
+      "description": "End-to-end business workflow pass rate.",
+      "caveat": "Opus 5 card says 26.0, Opus 5.5 card says 26.9 for the same model. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+    },
+    "Artificial Analysis Intelligence Index v4.1": {
+      "description": "Composite measure of general reasoning, knowledge and agentic work across the suites in that index version; index points are not percent accuracy.",
+      "caveat": "Versions differ: v4.1 (GPT-5.6 article, July 2026), v4.1.1 (OpenAI table), v5.0.1 (current AA model pages). Scores across versions are not comparable. AA reports max effort unless noted. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index"
+    },
+    "Artificial Analysis Coding Agent Index": {
+      "description": "AA coding harness index (DeepSWE, Terminal-Bench v2, SWE-Atlas-QnA in the July article).",
+      "caveat": "Version and harness changed between reports. Only compare within one article. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/articles/gpt-5-6-has-landed"
+    },
+    "FrontierSWE v2": {
+      "description": "Long-horizon software-engineering benchmarks. FrontierCode 2.0 (Google) and FrontierSWE v2 (Google Argon) are not the same as Z.AI's FrontierSWE (Proximal dominance score).",
+      "caveat": "Names overlap across vendors. Do not merge rows. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "Terminal-bench 4.0": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "GraphWalks": {
+      "description": "Long-context graph traversal (BFS F1) at stated context lengths.",
+      "caveat": "Context-length bucket matters (128k vs 256k-1M). The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-neon/"
+    },
+    "OSWorld-2.0": {
+      "description": "Computer-use benchmarks.",
+      "caveat": "Versions and subsets differ (offline subset, partial score, batch tools). Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+    },
+    "Terminal-Bench 4.1": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "Agents' Last Exam v1.1": {
+      "description": "Agentic exam benchmark; Z.AI uses ALE-CLI (105 tasks, Claude Code harness).",
+      "caveat": "Names vary across vendors (Agents' Last Exam v1.1, Agents' Last Exam ALE-CLI, Agent's Last Exam pass rate). Compare only within the same name and version. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "AutomationBench-AA": {
+      "description": "End-to-end business workflow pass rate.",
+      "caveat": "Opus 5 card says 26.0, Opus 5.5 card says 26.9 for the same model. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+    },
+    "OSWorld-2.1": {
+      "description": "Computer-use benchmarks.",
+      "caveat": "Versions and subsets differ (offline subset, partial score, batch tools). Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-4-hydrogen/"
+    },
+    "HLE-Diamond": {
+      "description": "Humanity's Last Exam variants.",
+      "caveat": "Tool access, subsets and judge differ. Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "GDP.pdf": {
+      "description": "Expert PDF document comprehension benchmark.",
+      "caveat": "Different row from the Gemini 3.8 Flash card's GDP.PDF (same name, different run). The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain"
+    },
+    "CursorBench 4.1": {
+      "description": "Multi-file ambiguous coding tasks from real Cursor sessions.",
+      "caveat": "Versions 3.2 and 4.0 are not comparable. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "Terminal-bench 4.1": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "FrontierCode 2.0": {
+      "description": "Long-horizon software-engineering benchmarks. FrontierCode 2.0 (Google) and FrontierSWE v2 (Google Argon) are not the same as Z.AI's FrontierSWE (Proximal dominance score).",
+      "caveat": "Names overlap across vendors. Do not merge rows. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "Terminal-bench 2.1": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "GDP.PDF": {
+      "description": "Expert PDF document comprehension benchmark.",
+      "caveat": "Different row from the Gemini 3.8 Flash card's GDP.PDF (same name, different run). The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://artificialanalysis.ai/articles/gemini-4-neon-intelligence-gain"
+    },
+    "HLE-Verified": {
+      "description": "Humanity's Last Exam variants.",
+      "caveat": "Tool access, subsets and judge differ. Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "SWE-Bench Pro (Public)": {
+      "description": "Harder real-repository SWE-bench variant.",
+      "caveat": "Not comparable to Verified. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://assets.claude.com/b514064af1408018e64b1ad24e7d5e75850b4ffd.pdf"
+    },
+    "GDM-MRCR v2 (8-needle)": {
+      "description": "Long-context multi-needle retrieval.",
+      "caveat": "Report by context bucket (128k average, 1M pointwise). The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://deepmind.google/models/model-cards/gemini-3-1-flash-lite/"
+    },
+    "Terminal-Bench 3.0": {
+      "description": "Agentic multi-step tasks in a terminal: coding, debugging, tooling and system operations. Score is successful task completion; each version is a different task set.",
+      "caveat": "Compare only the same benchmark version, harness, effort, time budget and scoring policy. Vendor and independent runs differ. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www.anthropic.com/claude-sonnet-5-5"
+    },
+    "FrontierSWE": {
+      "description": "Long-horizon software-engineering benchmarks. FrontierCode 2.0 (Google) and FrontierSWE v2 (Google Argon) are not the same as Z.AI's FrontierSWE (Proximal dominance score).",
+      "caveat": "Names overlap across vendors. Do not merge rows. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "CyberGym": {
+      "description": "Vulnerability discovery from white-box source (1,507 tasks for Z.AI).",
+      "caveat": "Z.AI harness with no web tools; setup differs from other cyber benchmarks. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "Toolathlon Verified": {
+      "description": "Tool-use benchmark, pass@1 averaged over 3 runs (Z.AI).",
+      "caveat": "Z.AI-run via official service. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "AutomationBench v1.0.6": {
+      "description": "End-to-end business workflow pass rate.",
+      "caveat": "Opus 5 card says 26.0, Opus 5.5 card says 26.9 for the same model. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://www-cdn.anthropic.com/fc1b44717c85dc068bc6ba5024219938094694bd/Claude%20Opus%205.5%20System%20Card.pdf"
+    },
+    "Agents' Last Exam ALE-CLI": {
+      "description": "Agentic exam benchmark; Z.AI uses ALE-CLI (105 tasks, Claude Code harness).",
+      "caveat": "Names vary across vendors (Agents' Last Exam v1.1, Agents' Last Exam ALE-CLI, Agent's Last Exam pass rate). Compare only within the same name and version. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "HLE w/ Tools": {
+      "description": "Humanity's Last Exam variants.",
+      "caveat": "Tool access, subsets and judge differ. Do not merge. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "Z.ai Code Bench (in-house)": {
+      "description": "Z.AI private coding-agent benchmark across effort levels (task completion and checklist accuracy).",
+      "caveat": "Private, in-house. Version not stated for 5.3 page; Flash page cites v1.0 on Claude Code 2.1.207. Not publicly reproducible. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    },
+    "Z.ai Code Bench v1.0": {
+      "description": "Z.AI private coding-agent benchmark across effort levels (task completion and checklist accuracy).",
+      "caveat": "Private, in-house. Version not stated for 5.3 page; Flash page cites v1.0 on Claude Code 2.1.207. Not publicly reproducible. The score row preserves the exact reported version, units, setup and source.",
+      "source": "https://z.ai/blog/glm-5.3"
+    }
+  }
+}
