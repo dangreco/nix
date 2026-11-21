@@ -78,6 +78,8 @@ jobs:
     uses: ./.github/workflows/flake-checks.yml
     with:
       ref: ${{ needs.lock.outputs.sha }}
+      # New inputs are where real build breakage happens: build everything.
+      full: true
 
   merge:
     name: Merge checked lock update

@@ -16,7 +16,10 @@ nix fmt
 nix flake check
 ```
 
-Flake inputs update nightly and merge automatically after CI passes.
+PR CI evaluates every host and check, then builds only the light checks (~2 min).
+Host closures and NixOS tests are built in full by the nightly flake update, or
+on demand by running the CI workflow with `full`.
+Flake inputs update nightly and merge automatically after the full build passes.
 
 Changes to `dev` require an up-to-date PR, passing CI, and resolved review threads;
 no reviewer approval is required. Squash/rebase merges only; no force-pushes,
