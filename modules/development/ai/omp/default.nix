@@ -304,6 +304,10 @@ _: {
 
         home.packages = [ sync ];
 
+        # Always-apply rules (subagents included); the worktree layout and cleanup
+        # they describe come from ../../worktrees.
+        home.file.".omp/agent/rules/worktrees.md".source = ./_rules/worktrees.md;
+
         # Invalid local inputs fail visibly before native configuration is changed.
         home.activation.ompConfig =
           lib.hm.dag.entryAfter ([ "writeBoundary" ] ++ lib.optional hasSecrets "sops-nix")

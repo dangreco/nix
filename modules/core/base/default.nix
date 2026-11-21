@@ -82,7 +82,6 @@ in
         environment.systemPackages = [
           pkgs.git
           pkgs.gh
-          pkgs.worktrunk
           pkgs.vim
         ];
 
