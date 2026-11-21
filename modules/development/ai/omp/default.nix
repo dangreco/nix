@@ -116,7 +116,12 @@ _: {
       };
 
       # Objects merge, arrays and scalars are replaced (omp's own layer rules).
-      settings = lib.recursiveUpdate baseSettings cfg.settings;
+      userSettings = lib.recursiveUpdate baseSettings cfg.settings;
+      settings =
+        userSettings
+        // lib.optionalAttrs cfg.router.enable {
+          extensions = lib.unique ((userSettings.extensions or [ ]) ++ [ "${./_router}/index.ts" ]);
+        };
 
       # Shared MCP servers; my.omp.mcpServers adds to or replaces these by name.
       baseMcpServers = {
@@ -231,6 +236,8 @@ _: {
       options.my.omp = {
         enable = lib.mkEnableOption "upstream omp";
 
+        router.enable = lib.mkEnableOption "judge-driven routing across configured chat models";
+
         settings = lib.mkOption {
           type = lib.types.attrsOf lib.types.anything;
           default = { };
@@ -251,7 +258,10 @@ _: {
             Shared defaults load obra/superpowers (pinned above) as a Pi-compatible
             package: all skills plus the using-superpowers bootstrap on each model
             request. Setting `extensions` here replaces that package list; use
-            `extensions = []` to opt out. Update its revision and hash together.
+            `extensions = []` to opt out of Superpowers. The task router is appended
+            separately when `my.omp.router.enable` is true. See this module's README
+            for routing, fallback policy and benchmark sources. Update Superpowers'
+            revision and hash together.
 
             Values may embed sops secrets via `config.sops.placeholder."<secret>"`
             (the secret must be declared under `sops.secrets`). The value is
