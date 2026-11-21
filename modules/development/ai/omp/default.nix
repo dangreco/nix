@@ -113,6 +113,10 @@ _: {
         display = {
           showTurnTime = true;
         };
+
+        update = {
+          auto = true;
+        };
       };
 
       # Objects merge, arrays and scalars are replaced (omp's own layer rules).
