@@ -7,7 +7,10 @@ import { bounded, candidatesFrom, googleJudge, route, selector } from "./policy.
 import { mergeProfiles } from "./catalog.mjs";
 
 // No credentials or task text are journaled. The only persisted router data is
-// the chosen route and a bounded reason, visible through /router and the footer.
+// the chosen route and a bounded reason, visible through /router and notifications.
+// The status line shows just the route's tier emoji while routing is on.
+const tierEmoji: Record<string, string> = { genius: "🧠", smart: "🤓", average: "😐", dumb: "🥴" };
+
 export default function router(pi: ExtensionAPI) {
   let enabled = true;
   let expectedModel: string | undefined;
@@ -19,9 +22,10 @@ export default function router(pi: ExtensionAPI) {
   let running = false;
   let routingProfiles = mergeProfiles(profiles, {});
 
-  function show(ctx: ExtensionContext, text: string, notify = false) {
+  function show(ctx: ExtensionContext, text: string, notify = false, model = expectedModel) {
     status = `Router: ${text}`;
-    ctx.ui.setStatus("model-router", status);
+    const tier = model ? routingProfiles.models[model]?.tier : undefined;
+    ctx.ui.setStatus("model-router", enabled && tier ? tierEmoji[tier] : undefined);
     if (notify) ctx.ui.notify(status, "info");
   }
   function remember(ctx: ExtensionContext) {
@@ -166,7 +170,7 @@ export default function router(pi: ExtensionAPI) {
     if (ctx.agent.kind !== "main") return;
     remember(ctx);
     const model = event.to.replace(/:(off|minimal|low|medium|high|xhigh|max)$/, "");
-    show(ctx, `${routingProfiles.models[model]?.tier ?? "unclassified"} | provider fallback | ${event.to}`, true);
+    show(ctx, `${routingProfiles.models[model]?.tier ?? "unclassified"} | provider fallback | ${event.to}`, true, model);
   });
   pi.on("agent_end", (event, ctx) => {
     if (ctx.agent.kind !== "main") return;
@@ -180,7 +184,7 @@ export default function router(pi: ExtensionAPI) {
     // Do not adopt an unexplained model change: manual selection must win at
     // the next prompt. Native retry events above explicitly transfer ownership.
     if (ctx.model && selector(ctx.model) !== expectedModel) {
-      show(ctx, `active | ${selector(ctx.model)}`);
+      show(ctx, `active | ${selector(ctx.model)}`, false, selector(ctx.model));
     }
   });
 }

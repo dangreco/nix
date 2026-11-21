@@ -95,7 +95,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      checks: write
+      statuses: write
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -105,16 +105,16 @@ jobs:
     steps:
       # main's ruleset requires this check; only this job, after the full matrix,
       # publishes it, so the quick-tier result on the same commit cannot merge a release.
+      # A commit status, not a check run: the cut SHA is dev's HEAD, the commit this
+      # run is on, so a check run joins this run's dev check suite, which GitHub never
+      # links to the release/* PR. Statuses attach to the SHA alone.
       - name: Publish release check on the cut commit
         run: |
-          gh api --method POST "repos/$GH_REPO/check-runs" \
-            -f name="Release / Full checks" \
-            -f head_sha="$HEAD_SHA" \
-            -f status=completed \
-            -f conclusion=success \
-            -f details_url="$GITHUB_SERVER_URL/$GH_REPO/actions/runs/$GITHUB_RUN_ID" \
-            -f 'output[title]=All flake checks passed' \
-            -f 'output[summary]=The full flake-check matrix passed for this release commit.' \
+          gh api --method POST "repos/$GH_REPO/statuses/$HEAD_SHA" \
+            -f context="Release / Full checks" \
+            -f state=success \
+            -f target_url="$GITHUB_SERVER_URL/$GH_REPO/actions/runs/$GITHUB_RUN_ID" \
+            -f description="The full flake-check matrix passed for this release commit." \
             --silent
       - name: Merge release PR
         run: |

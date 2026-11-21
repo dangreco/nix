@@ -20,6 +20,7 @@ in
       imports = [
         (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
         nixos.dan-git
+        nixos.worktrees
       ];
 
       networking.hostName = "installer";
@@ -43,6 +44,7 @@ in
 
       environment.systemPackages = [
         pkgs.git
+        pkgs.gh
         pkgs.sbctl
         pkgs._1password-cli
         pkgs.nixos-facter

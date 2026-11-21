@@ -89,6 +89,13 @@ _: {
         environment.systemPackages = [
           pkgs.ptyxis
           pkgs.lm_sensors
+          # Clipboard CLIs: wl-copy/wl-paste for Wayland clients, xclip/xsel for tools
+          # that only speak X11 (served through XWayland). Mutter implements no
+          # data-control protocol, so watchers (wl-paste --watch, cliphist, clipman)
+          # cannot work here; wl-clipboard-rs would only duplicate wl-copy/wl-paste.
+          pkgs.wl-clipboard
+          pkgs.xclip
+          pkgs.xsel
         ];
         environment.persistence."/persist" = {
           directories = [

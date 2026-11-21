@@ -11,6 +11,15 @@ Dan and Work use the same Google judge key, encrypted separately in their own
 SOPS files; judge quota and revocation are therefore shared. Their proxy keys and
 user-owned local configuration files remain separate.
 
+## Managed rules
+
+`_rules/worktrees.md` is linked to `~/.omp/agent/rules/worktrees.md` as an
+always-apply rule, so subagents get it too. It tells agents to manage git worktrees
+only with worktrunk (`wt`), using `<ticket>-<slug>` branch names. Worktree placement
+(`<repo>/.worktrees/<branch>`), automatic `wt step prune` and the global `.worktrees/`
+ignore come from `modules/development/worktrees`, which covers every user on every
+host. Add your own rules as other files in `~/.omp/agent/rules/`.
+
 ## Local customization without Nix edits
 
 Every enabled OMP user gets `omp-sync-config`. Keep customizations in these
@@ -233,7 +242,14 @@ whereas an injected 401 immediately walked the cross-account chain.
 - A later manual model/effort change is preserved and suspends routing on the next task.
 - Controls are session-local, not persisted preferences. New sessions reset them.
 
-The footer and a notification show `Router: <tier> | <provider/model>`.
+While routing is on, the status line shows the active route's tier as an emoji just
+before the model: 🧠 genius, 🤓 smart, 😐 average, 🥴 dumb. omp separates every
+segment, so it reads `π > 🤓 > [high] Opus 5.5`. There is no emoji while routing is
+off or the active model has no tier. To do this, the module sets a custom
+`statusLine`: omp's `default` preset with a `status` segment before `model`, and
+`showHookStatus: false` so extension statuses no longer get a footer line. Your own
+`my.omp.settings.statusLine` or `config.local.yml` still overrides it.
+Notifications and `/router status` give the full text, `Router: <tier> | <provider/model>`.
 A judge failure adds `fallback: <reason>`. Native inference failovers show the actual
 replacement and its tier, including any cross-tier change. The ordinary model chip
 also follows OMP's active model. Router journal entries contain only model/tier and
