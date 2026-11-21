@@ -92,5 +92,9 @@ in
   flake.modules.homeManager.base = {
     home.stateVersion = "26.05";
     nix.assumeXdg = true;
+
+    # gh (installed above) keeps the logged-in account in hosts.yml; the token itself
+    # is in the (persisted) GNOME keyring, so without this gh is logged out every boot.
+    home.persistence."/persist".directories = [ ".config/gh" ];
   };
 }
