@@ -22,6 +22,19 @@ Host closures and NixOS tests are built in full by the nightly flake update, or
 on demand by running the CI workflow with `full`.
 Flake inputs update nightly and merge automatically after the full build passes.
 
+## Optional binary caches
+
+On installed hosts, normal users can opt in to the [Numtide](https://cache.numtide.com/)
+and [Nix Community](https://nix-community.org/cache/) binary caches. Their signing
+keys are trusted system-wide, but `cache.nixos.org` remains the only default
+substituter.
+
+To add Numtide for a single command:
+
+```sh
+nix build --option extra-substituters https://cache.numtide.com nixpkgs#hello
+```
+
 ## Releases
 
 Hosts run `main`; development happens on `dev`. Every Sunday at 08:00 UTC, the
