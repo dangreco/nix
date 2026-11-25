@@ -63,6 +63,16 @@ in
           auto-allocate-uids = true;
           extra-system-features = [ "uid-range" ];
           use-xdg-base-directories = true;
+
+          # Allow normal users to select these caches without using them by default.
+          trusted-substituters = [
+            "https://cache.numtide.com"
+            "https://nix-community.cachix.org"
+          ];
+          trusted-public-keys = [
+            "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+            "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+          ];
         };
         nixpkgs.config.allowUnfree = true;
 
